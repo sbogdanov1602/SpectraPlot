@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpectraPlot", "plot-examples.vcxproj", "{4A086AD4-FE06-3F5B-9FA4-4CCA14F92D24}"
+	ProjectSection(ProjectDependencies) = postProject
+		{888F1B8A-0F4A-48F2-BCB6-275D59CDFAC1} = {888F1B8A-0F4A-48F2-BCB6-275D59CDFAC1}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "metrology", "metrology\metrology.vcxproj", "{888F1B8A-0F4A-48F2-BCB6-275D59CDFAC1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A086AD4-FE06-3F5B-9FA4-4CCA14F92D24}.Debug|x64.ActiveCfg = Debug|x64
+		{4A086AD4-FE06-3F5B-9FA4-4CCA14F92D24}.Debug|x64.Build.0 = Debug|x64
+		{4A086AD4-FE06-3F5B-9FA4-4CCA14F92D24}.Release|x64.ActiveCfg = Release|x64
+		{4A086AD4-FE06-3F5B-9FA4-4CCA14F92D24}.Release|x64.Build.0 = Release|x64
+		{888F1B8A-0F4A-48F2-BCB6-275D59CDFAC1}.Debug|x64.ActiveCfg = Debug|x64
+		{888F1B8A-0F4A-48F2-BCB6-275D59CDFAC1}.Debug|x64.Build.0 = Debug|x64
+		{888F1B8A-0F4A-48F2-BCB6-275D59CDFAC1}.Release|x64.ActiveCfg = Release|x64
+		{888F1B8A-0F4A-48F2-BCB6-275D59CDFAC1}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0B720913-4765-4652-9C50-79AE96E57D88}
+	EndGlobalSection
+EndGlobal
