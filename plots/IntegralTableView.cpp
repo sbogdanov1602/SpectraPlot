@@ -8,14 +8,18 @@ IntegralTableView::IntegralTableView(QWidget* parent) :QTableView(parent)
 
     QAction* deleteSelectedAction = new QAction(tr("Delete selected"));
     QAction* deleteAllAction = new QAction(tr("Delete all"));
+    QAction* saveAsCsvAction = new QAction(tr("Save to .csv file"));
     setContextMenuPolicy(Qt::ActionsContextMenu);
 	addAction(deleteSelectedAction);
     addAction(deleteAllAction);
+    addAction(saveAsCsvAction);
     deleteSelectedAction->setEnabled(true);
     deleteAllAction->setEnabled(true);
+    saveAsCsvAction->setEnabled(true);
 
     QObject::connect(deleteSelectedAction, &QAction::triggered, this, qOverload<>(&IntegralTableView::deleteSelected));
     QObject::connect(deleteAllAction, &QAction::triggered, this, qOverload<>(&IntegralTableView::deleteAll));
+    QObject::connect(saveAsCsvAction, &QAction::triggered, this, qOverload<>(&IntegralTableView::saveToCsvFile));
 }
 
 void IntegralTableView::deleteSelected()
@@ -34,5 +38,11 @@ void IntegralTableView::deleteSelected()
 void IntegralTableView::deleteAll()
 {
     ((IntegralModel*)model())->deleteAllData();
+
+}
+
+void IntegralTableView::saveToCsvFile()
+{
+    ((IntegralModel*)model())->saveToCsvFile();
 
 }

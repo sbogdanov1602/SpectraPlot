@@ -82,6 +82,7 @@ int2Dresult C2DIntegralCalc::Calculate()
 	ret.leftY = beg_v;
 	ret.rightY = end_v;
 	ret.time = QTime::currentTime().toString();
+	ret.date = QDate::currentDate().toString();
 	return ret;
 }
 

@@ -1,11 +1,12 @@
 #pragma once
 
-const int TIME_COLUMN = 0;
+const int VALUE_COLUMN = 0;
 const int LEFT_X_COLUMN = 1;
 const int RIGHT_X_COLUMN = 2;
 const int LEFT_Y_COLUMN = 3;
 const int RIGHT_Y_COLUMN = 4;
-const int VALUE_COLUMN = 5;
+const int TIME_COLUMN = 5;
+const int DATE_COLUMN = 6;
 
 struct int2Dresult
 {
@@ -15,6 +16,7 @@ struct int2Dresult
 	double leftY;
 	double rightY;
 	QString time;
+	QString date;
 };
 
 class  CalcResult {

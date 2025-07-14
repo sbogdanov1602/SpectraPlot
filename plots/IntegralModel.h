@@ -16,6 +16,7 @@ public:
     void addNewData(int2Dresult value);
     void deleteData(QModelIndexList indexes);
     void deleteAllData();
+    void saveToCsvFile();
 private:
     QList<int2Dresult> m_Results;
 };

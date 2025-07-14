@@ -1,11 +1,14 @@
 #include "IntegralModel.h"
+#include <qdir.h>
+#include <qfiledialog.h>
 
-const QString TIME_COLUMN_NAME("Time");
-const QString LEFT_X_COLUMN_NAME("Left X");
-const QString RIGHT_X_COLUMN_NAME("Right X");
-const QString LEFT_Y_COLUMN_NAME("Bottom Y");
-const QString RIGHT_Y_COLUMN_NAME("Top Y");
-const QString VALUE_COLUMN_NAME("2D integral");
+const QString VALUE_COLUMN_NAME(QObject::tr("2D integral"));
+const QString LEFT_X_COLUMN_NAME(QObject::tr("Left X"));
+const QString RIGHT_X_COLUMN_NAME(QObject::tr("Right X"));
+const QString LEFT_Y_COLUMN_NAME(QObject::tr("Bottom Y"));
+const QString RIGHT_Y_COLUMN_NAME(QObject::tr("Top Y"));
+const QString TIME_COLUMN_NAME(QObject::tr("Time"));
+const QString DATE_COLUMN_NAME(QObject::tr("Date"));
 
 IntegralModel::IntegralModel(QObject* parent) : QAbstractTableModel(parent)
 {
@@ -51,9 +54,47 @@ void IntegralModel::deleteAllData()
     }
 }
 
+void IntegralModel::saveToCsvFile()
+{
+    if (m_Results.size() > 0)
+    {
+        QString str = "";
+
+        auto curDir = QDir::current();
+        QString filter("*.csv");
+        auto filePath = QFileDialog::getSaveFileName(nullptr, tr("Save to file"),
+            curDir.dirName(), "*.csv", &filter, QFileDialog::Option::ReadOnly);
+
+        if (!filePath.isEmpty())
+        {
+            QFile file(filePath);
+            if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                file.close();
+            }
+            else {
+                str = VALUE_COLUMN_NAME + "," + LEFT_X_COLUMN_NAME + "," + RIGHT_X_COLUMN_NAME + "," + LEFT_Y_COLUMN_NAME;
+                str += "," + RIGHT_Y_COLUMN_NAME + "," + TIME_COLUMN_NAME + "," + DATE_COLUMN_NAME + "\n";
+
+                QTextStream out(&file);
+                out << str;
+
+                for (auto it = m_Results.begin(); it != m_Results.end(); it++)
+                {
+                    str = QString::asprintf("%8.4f,%7.3f,%7.3f,%8.2f,%8.2f"
+                        , it->value, it->leftX, it->rightX, it->leftY, it->rightY);
+                    str += "," + it->time + "," + it->date + "\n";
+                    out << str;
+                }
+
+                file.close();
+            }
+        }
+    }
+}
+
 int IntegralModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return (VALUE_COLUMN + 1);
+    return (DATE_COLUMN + 1);
 }
 
 QVariant IntegralModel::data(const QModelIndex& index, int role) const
@@ -65,10 +106,9 @@ QVariant IntegralModel::data(const QModelIndex& index, int role) const
             int idx = row;//size - 1 - row;
             switch (index.column()) 
             {
-            case TIME_COLUMN:
+            case VALUE_COLUMN:
             {
-                return m_Results[idx].time;
-                break;
+                return QString::asprintf("%8.4f", m_Results[idx].value);
             }
             case LEFT_X_COLUMN:
             {
@@ -86,9 +126,15 @@ QVariant IntegralModel::data(const QModelIndex& index, int role) const
             {
                 return QString::asprintf("%8.2f", m_Results[idx].rightY);
             }
-            case VALUE_COLUMN:
+            case TIME_COLUMN:
             {
-                return QString::asprintf("%8.4f", m_Results[idx].value);
+                return m_Results[idx].time;
+                break;
+            }
+            case DATE_COLUMN:
+            {
+                return m_Results[idx].date;
+                break;
             }
             default:
                 return QVariant();
@@ -107,9 +153,9 @@ QVariant IntegralModel::headerData(int section, Qt::Orientation orientation, int
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
         switch (section)
         {
-        case TIME_COLUMN:
+        case VALUE_COLUMN:
         {
-            return TIME_COLUMN_NAME;
+            return VALUE_COLUMN_NAME;
         }
         case LEFT_X_COLUMN:
         {
@@ -127,9 +173,13 @@ QVariant IntegralModel::headerData(int section, Qt::Orientation orientation, int
         {
             return RIGHT_Y_COLUMN_NAME;
         }
-        case VALUE_COLUMN:
+        case TIME_COLUMN:
         {
-            return VALUE_COLUMN_NAME;
+            return TIME_COLUMN_NAME;
+        }
+        case DATE_COLUMN:
+        {
+            return DATE_COLUMN_NAME;
         }
         default:
             return QVariant();

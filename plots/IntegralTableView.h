@@ -8,5 +8,6 @@ public:
 private:
 	void deleteSelected();
 	void deleteAll();
+	void saveToCsvFile();
 };
 
