@@ -70,6 +70,9 @@
     <ClCompile Include="IntegralModel.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="SmpData.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mainwindow.h">
@@ -118,6 +121,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="IntegralTableView.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SmpData.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

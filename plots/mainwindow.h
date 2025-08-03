@@ -50,6 +50,7 @@
 #include "Cursor.h"
 //#include <TextLabelResults.h>
 #include "IntegralModel.h"
+#include "CommonLib/CommonLib.h"
 
 namespace Ui {
 class MainWindow;
@@ -91,14 +92,19 @@ private:
   QString m_dir;
   QString m_LastFolder;
   QStringList m_fileList;
+/*
   std::vector<std::vector<double>> m_lstSpecData;
   std::vector<std::vector<double>> m_lstSpecDataT;
   double m_spectraNum;
   double m_maxSignal;
   double m_pointsNum;
-  double m_pointStep;
   double m_measurementStep;
   double m_SignalCoeff;
+*/
+  double m_pointStep;
+
+  IPlotData* m_pPlotData;
+
   int m_NMeaning;
   int m_spectrumIdx;
   int m_pointIdx;
