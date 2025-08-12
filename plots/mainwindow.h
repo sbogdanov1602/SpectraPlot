@@ -65,6 +65,9 @@ public:
   ~MainWindow();
   
   void setupColorDataMap(QCustomPlot* customPlot);
+  void setProgressDlgValue(int value);
+  void closeProgressDlg();
+  void progressDlgWasCanceled();
 
 public slots:
 	void onOpenAction();
@@ -104,6 +107,7 @@ private:
   double m_pointStep;
 
   IPlotData* m_pPlotData;
+  QProgressDialog* m_pProgressDlg;
 
   int m_NMeaning;
   int m_spectrumIdx;

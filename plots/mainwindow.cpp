@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
   ui(new Ui::MainWindow)
 {
   m_pPlotData = nullptr;
+  m_pProgressDlg = nullptr;
   m_dir = QApplication::applicationDirPath();
   /*
   m_spectraNum = 0.0;
@@ -334,6 +335,7 @@ void MainWindow::onPlotVClick(QCPAbstractPlottable* plottable, int dataIndex, QM
 
 void MainWindow::onOpenAction()
 {
+    int retNFiles = 0;
     auto curDir = QDir::current();
     QString filter("*.smp");
     auto fname = QFileDialog::getOpenFileName(this, tr("Open Directory"),
@@ -341,19 +343,58 @@ void MainWindow::onOpenAction()
 
     auto pos = fname.lastIndexOf('/');
     setWindowTitle(QCoreApplication::translate("MainWindow", "SpectraPlot", nullptr));
-    if (pos >= 0) {
+    if (pos >= 0)
+    {
         m_dir = fname.left(pos);
         pos = m_dir.lastIndexOf('/');
-        if (pos >= 0) {
+        if (pos >= 0) 
+        {
             m_LastFolder = m_dir.mid(pos + 1);
             QString s = "SpectraPlot: " + m_LastFolder;
             setWindowTitle(QCoreApplication::translate("MainWindow", &(s.toStdString()[0]), nullptr));
         }
+        
         QDir directory(m_dir);
         m_fileList = directory.entryList(QStringList() << "*.smp" << "*.SMP", QDir::Files);
-        std::sort(m_fileList.begin(), m_fileList.end());
-        LoadSpectra();
+        //std::sort(m_fileList.begin(), m_fileList.end());
+        //LoadSpectra();
+        
+        if (m_pPlotData != nullptr) 
+        {
+            delete m_pPlotData;
+            m_pPlotData = nullptr;
+        }
+
+        m_pPlotData = new SmpData();
+        if (m_pProgressDlg != nullptr) {
+            delete m_pProgressDlg;
+            m_pProgressDlg = nullptr;
+        }
+
+        m_pProgressDlg = new QProgressDialog(tr("Loading files..."), tr("Stop"), 0, m_fileList.size(), this);
+        m_pProgressDlg->setWindowModality(Qt::WindowModal);
+        QObject::connect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
+        m_pProgressDlg->show();
+        m_pProgressDlg->setValue(0);
+
+        //void (*ptrToSetValue)(int);
+        auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
+
+        retNFiles = m_pPlotData->Load(fname.toStdString(), ptrToSetValue/* & (MainWindow::setProgressDlgValue)*/, nullptr/*&MainWindow::closeProgressDlg*/);
+
+        QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
+        m_pProgressDlg->close();
+        delete m_pProgressDlg;
+        m_pProgressDlg = nullptr;
     }
+
+    QMessageBox::information(
+        this,
+        "SMP files is loaded",
+        QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(m_pPlotData->SpectraNum()),
+        QMessageBox::StandardButton::Ok);
+
+    setupColorDataMap(ui->customPlot);
 }
 
 void MainWindow::ClearCursors()
@@ -404,6 +445,8 @@ void MainWindow::LoadSpectra()
 
     QProgressDialog progress(tr("Loading files..."), tr("Stop"), 0, numFiles, this);
     progress.setWindowModality(Qt::WindowModal);
+    //connect(&progress, SIGNAL(canceled()), SLOT(progressDlgWasCanceled()));
+    QObject::connect(&progress, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
 
     for (auto&& filePath : m_fileList)
     {
@@ -791,6 +834,34 @@ void MainWindow::onCalculateSummAction()
         QMessageBox::warning(this, tr("SpectraPlot"), tr("Select horizontal and vertical calculation intervals."));
     }
 }
+
+void MainWindow::setProgressDlgValue(int value)
+{
+    if (m_pProgressDlg != nullptr) {
+        m_pProgressDlg->setValue(value);
+    }
+}
+
+void MainWindow::closeProgressDlg()
+{
+    if (m_pProgressDlg != nullptr) {
+        m_pProgressDlg->close();
+        delete m_pProgressDlg;
+        m_pProgressDlg = nullptr;
+    }
+}
+
+void MainWindow::progressDlgWasCanceled()
+{
+    if (m_pPlotData != nullptr) {
+        m_pPlotData->CancelLoad();
+    }
+    if (m_pProgressDlg != nullptr) {
+//        delete m_pProgressDlg;
+//        m_pProgressDlg = nullptr;
+    }
+}
+
 
 
 
