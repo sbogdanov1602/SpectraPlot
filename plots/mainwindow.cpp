@@ -55,7 +55,7 @@
 #include <C2DIntegralCalc.h>
 #include "pd_alg/pd_alg.h"
 #include "pd_alg/pd_data.h"
-#include "SmpData.h"
+#include "SmpLoader/SmpLoader.h"
 
 Ui_MainWindow;
 
@@ -365,7 +365,7 @@ void MainWindow::onOpenAction()
             m_pPlotData = nullptr;
         }
 
-        m_pPlotData = new SmpData();
+        m_pPlotData = smp::GetIPlotData();
         if (m_pProgressDlg != nullptr) {
             delete m_pProgressDlg;
             m_pProgressDlg = nullptr;
@@ -377,10 +377,9 @@ void MainWindow::onOpenAction()
         m_pProgressDlg->show();
         m_pProgressDlg->setValue(0);
 
-        //void (*ptrToSetValue)(int);
         auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
 
-        retNFiles = m_pPlotData->Load(fname.toStdString(), ptrToSetValue/* & (MainWindow::setProgressDlgValue)*/, nullptr/*&MainWindow::closeProgressDlg*/);
+        retNFiles = m_pPlotData->Load(fname.toStdString(), ptrToSetValue, nullptr);
 
         QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
         m_pProgressDlg->close();
@@ -422,100 +421,6 @@ void MainWindow::onResetAction()
         ui->customPlot->replot();
  //       ui->customPlotH_2->replot();
     }
-}
-
-void MainWindow::LoadSpectra()
-{
-    if (m_dir.isEmpty())
-        return;
-    size_t nFiles = 0;
-    size_t nSpecs = 0;
-
-    int specthumLength_ = 0;
-    if (m_pPlotData != nullptr) {
-        delete m_pPlotData;
-        m_pPlotData = nullptr;
-    }
-
-    m_pPlotData = new SmpData();
-
-    int numFiles = m_fileList.size();
-    m_pPlotData->SetMaxSignal(0.0);
-    int pointsNum = 0;
-
-    QProgressDialog progress(tr("Loading files..."), tr("Stop"), 0, numFiles, this);
-    progress.setWindowModality(Qt::WindowModal);
-    //connect(&progress, SIGNAL(canceled()), SLOT(progressDlgWasCanceled()));
-    QObject::connect(&progress, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
-
-    for (auto&& filePath : m_fileList)
-    {
-        progress.setValue(nFiles);
-
-        if (progress.wasCanceled())
-            break;
-
-        QFile file(m_dir + "/" + filePath);
-
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-            continue;
-
-        QTextStream in(&file);
-        int i = 0;
-        while (!in.atEnd()) {
-            QString line = in.readLine();
-            if (line.contains("-"))
-            {
-                if (pointsNum < i) {
-                    pointsNum = i;
-                }
-                m_pPlotData->LstSpecData().push_back(std::vector<double>());
-                i = 0;
-                continue;
-            }
-            if (m_pPlotData->LstSpecData().empty())
-        		continue;
-			auto&& vec = m_pPlotData->LstSpecData().back();
-            bool ok = false;
-
-            double val = line.toInt(&ok);
-            if (!ok)
-                break;
-            val *= m_pPlotData->SignalCoeff();
-            if (m_pPlotData->GetMaxSignal() < val) {
-                m_pPlotData->SetMaxSignal(val);
-            }
-            vec.push_back(val);
-            i++;
-        }
-        in.flush();
-        file.close();
-        if (pointsNum < i) {
-            pointsNum = i;
-        }
-        ++nFiles;
-    }
-    progress.setValue(nFiles);
-    progress.close();
-    nSpecs = m_pPlotData->LstSpecData().size();
-    if (nSpecs > 0) {
-        size_t size = m_pPlotData->LstSpecData().at(0).size();
-        m_pPlotData->LstSpecDataT().resize(size);
-        for (int i = 0; i < nSpecs; i++) {
-            for (int j = 0; j < size; j++) {
-                auto v = m_pPlotData->LstSpecData()[i][j];
-                m_pPlotData->LstSpecDataT()[j].push_back(v);
-            }
-        }
-    }
-
-    QMessageBox::information(
-        this,
-        "SMP files is loaded",
-        QStringLiteral("Files: ") + QString::number(nFiles) + ", Spectra: " + QString::number(nSpecs),
-        QMessageBox::StandardButton::Ok);
-
-    setupColorDataMap(ui->customPlot);
 }
 
 void MainWindow::setupColorDataMap(QCustomPlot* customPlot)

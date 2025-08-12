@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpectraPlot", "plot-examples.vcxproj", "{4A086AD4-FE06-3F5B-9FA4-4CCA14F92D24}"
 	ProjectSection(ProjectDependencies) = postProject
 		{27337CFD-EB74-4BD8-B374-413B17246EE5} = {27337CFD-EB74-4BD8-B374-413B17246EE5}
+		{4FC40A44-8D81-4B83-AC79-9C0D5ABCC3F2} = {4FC40A44-8D81-4B83-AC79-9C0D5ABCC3F2}
 		{888F1B8A-0F4A-48F2-BCB6-275D59CDFAC1} = {888F1B8A-0F4A-48F2-BCB6-275D59CDFAC1}
 	EndProjectSection
 EndProject
@@ -14,6 +15,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CCHReader", "CCHReader\CCHReader.vcxproj", "{27337CFD-EB74-4BD8-B374-413B17246EE5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommonLib", "CommonLib\CommonLib.vcxproj", "{C0197003-1969-4F5B-9A0D-B437A131F853}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmpLoader", "SmpLoader\SmpLoader.vcxproj", "{4FC40A44-8D81-4B83-AC79-9C0D5ABCC3F2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0197003-1969-4F5B-9A0D-B437A131F853} = {C0197003-1969-4F5B-9A0D-B437A131F853}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +43,10 @@ Global
 		{C0197003-1969-4F5B-9A0D-B437A131F853}.Debug|x64.Build.0 = Debug|x64
 		{C0197003-1969-4F5B-9A0D-B437A131F853}.Release|x64.ActiveCfg = Release|x64
 		{C0197003-1969-4F5B-9A0D-B437A131F853}.Release|x64.Build.0 = Release|x64
+		{4FC40A44-8D81-4B83-AC79-9C0D5ABCC3F2}.Debug|x64.ActiveCfg = Debug|x64
+		{4FC40A44-8D81-4B83-AC79-9C0D5ABCC3F2}.Debug|x64.Build.0 = Debug|x64
+		{4FC40A44-8D81-4B83-AC79-9C0D5ABCC3F2}.Release|x64.ActiveCfg = Release|x64
+		{4FC40A44-8D81-4B83-AC79-9C0D5ABCC3F2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -133,7 +133,6 @@ private:
   QCPColorScale* m_colorScale;
   QCPMarginGroup* m_marginGroup;
 
-  void LoadSpectra();
   void plotOneGraph(QCustomPlot* customPlot, std::vector<double> in);
   void plotTwoGraph(QCustomPlot* customPlot, std::vector<double> in);
   void restoreWidgetsGeometry();
