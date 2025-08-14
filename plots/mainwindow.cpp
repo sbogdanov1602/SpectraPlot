@@ -56,6 +56,7 @@
 #include "pd_alg/pd_alg.h"
 #include "pd_alg/pd_data.h"
 #include "SmpLoader/SmpLoader.h"
+#include "CchLoader/CchLoader.h"
 
 Ui_MainWindow;
 
@@ -337,9 +338,9 @@ void MainWindow::onOpenAction()
 {
     int retNFiles = 0;
     auto curDir = QDir::current();
-    QString filter("*.smp");
+    QString filter("*.smp *.cch");
     auto fname = QFileDialog::getOpenFileName(this, tr("Open Directory"),
-        m_dir.isEmpty() ? curDir.dirName() : m_dir, "*.smp", &filter, QFileDialog::Option::ReadOnly);
+        m_dir.isEmpty() ? curDir.dirName() : m_dir, "(*.smp *.cch)", &filter, QFileDialog::Option::ReadOnly);
 
     auto pos = fname.lastIndexOf('/');
     setWindowTitle(QCoreApplication::translate("MainWindow", "SpectraPlot", nullptr));
@@ -355,45 +356,60 @@ void MainWindow::onOpenAction()
         }
         
         QDir directory(m_dir);
-        m_fileList = directory.entryList(QStringList() << "*.smp" << "*.SMP", QDir::Files);
-        //std::sort(m_fileList.begin(), m_fileList.end());
-        //LoadSpectra();
-        
-        if (m_pPlotData != nullptr) 
-        {
-            delete m_pPlotData;
-            m_pPlotData = nullptr;
-        }
+        pos = fname.lastIndexOf('.');
+        if (pos >= 0) {
+            QString ext = fname.mid(pos + 1);
 
-        m_pPlotData = smp::GetIPlotData();
-        if (m_pProgressDlg != nullptr) {
+            m_fileList = directory.entryList(QStringList() << "*." + ext << "*." + ext.toUpper(), QDir::Files);
+            //std::sort(m_fileList.begin(), m_fileList.end());
+            //LoadSpectra();
+
+            if (m_pPlotData != nullptr)
+            {
+                //delete m_pPlotData;
+                m_pPlotData = nullptr;
+            }
+            bool loadOneFileOnly = false;
+            ext = ext.toLower();
+            if (ext == "smp") {
+                m_pPlotData = smp::GetIPlotData();
+                loadOneFileOnly = false;
+            }
+            else if (ext == "cch") {
+                m_pPlotData = cch::GetIPlotData();
+                loadOneFileOnly = false;
+            }
+
+            if (m_pProgressDlg != nullptr) {
+                delete m_pProgressDlg;
+                m_pProgressDlg = nullptr;
+            }
+            int fileCount = (loadOneFileOnly) ? 1 : m_fileList.size();
+            m_pProgressDlg = new QProgressDialog(tr("Loading files..."), tr("Stop"), 0, fileCount, this);
+            m_pProgressDlg->setWindowModality(Qt::WindowModal);
+            QObject::connect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
+            m_pProgressDlg->show();
+            m_pProgressDlg->setValue(0);
+
+            auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
+            auto ptrToSetMaximum = std::bind(&QProgressDialog::setMaximum, m_pProgressDlg, std::placeholders::_1);
+
+            retNFiles = m_pPlotData->Load(fname.toStdString(), ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
+
+            QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
+            m_pProgressDlg->close();
             delete m_pProgressDlg;
             m_pProgressDlg = nullptr;
+
+            QMessageBox::information(
+                this,
+                "SMP files is loaded",
+                QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(m_pPlotData->SpectraNum()),
+                QMessageBox::StandardButton::Ok);
+
+            setupColorDataMap(ui->customPlot);
         }
-
-        m_pProgressDlg = new QProgressDialog(tr("Loading files..."), tr("Stop"), 0, m_fileList.size(), this);
-        m_pProgressDlg->setWindowModality(Qt::WindowModal);
-        QObject::connect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
-        m_pProgressDlg->show();
-        m_pProgressDlg->setValue(0);
-
-        auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
-
-        retNFiles = m_pPlotData->Load(fname.toStdString(), ptrToSetValue, nullptr);
-
-        QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
-        m_pProgressDlg->close();
-        delete m_pProgressDlg;
-        m_pProgressDlg = nullptr;
     }
-
-    QMessageBox::information(
-        this,
-        "SMP files is loaded",
-        QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(m_pPlotData->SpectraNum()),
-        QMessageBox::StandardButton::Ok);
-
-    setupColorDataMap(ui->customPlot);
 }
 
 void MainWindow::ClearCursors()
@@ -428,6 +444,9 @@ void MainWindow::setupColorDataMap(QCustomPlot* customPlot)
     demoName = "Color Data Map";
     if(m_pPlotData != nullptr && m_pPlotData->LstSpecData().size() > 0)
     {
+        customPlot->clearGraphs();
+        customPlot->clearPlottables();
+        customPlot->clearItems();
         ClearLines();
         ClearResults();
         ClearCursors();
@@ -521,7 +540,7 @@ MainWindow::~MainWindow()
 
     delete m_pSettings;
     if (m_pPlotData != nullptr) {
-        delete m_pPlotData;
+        //delete m_pPlotData;
         m_pPlotData = nullptr;
     }
     delete ui;

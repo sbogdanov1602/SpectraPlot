@@ -1,19 +1,10 @@
 #pragma once
-
 #include "smploader_global.h"
+#include "SmpData.h"
+
 class IPlotData;
 
-class SmpLoader
-{
-public:
-    SmpLoader();
-    ~SmpLoader();
-    IPlotData* PlotData();
-private:
-    IPlotData* m_pPlotData;
-};
-
-extern SmpLoader SmpLoaderInstance;
+extern SmpData SmpDataInstance;
 
 namespace smp
 {

@@ -6,29 +6,30 @@ SmpData::SmpData():IPlotData()
 {
 }
 
-int SmpData::Load(std::string filePath, std::function<void(int)>  setProgressDlgValue/*void(*setProgressDlgValue)(int)*/, void(*closeProgressDlg)())
+int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressDlgValue, std::function<void(int)>  setMaximum, bool loadOneFileOnly)
 {
-    QString fname(&(filePath[0]));
+    ClearData();
+
+    QString fname(&(inFilePath[0]));
     QString dir;
     QStringList fileList;
-    auto pos = fname.lastIndexOf('/');
-    if (pos >= 0) {
-        dir = fname.left(pos);
-        /*
-        pos = m_dir.lastIndexOf('/');
+
+    if (!loadOneFileOnly) {
+        auto pos = fname.lastIndexOf('/');
         if (pos >= 0) {
-            m_LastFolder = m_dir.mid(pos + 1);
-            QString s = "SpectraPlot: " + m_LastFolder;
-            setWindowTitle(QCoreApplication::translate("MainWindow", &(s.toStdString()[0]), nullptr));
+            dir = fname.left(pos);
+            QDir directory(dir);
+            fileList = directory.entryList(QStringList() << "*.smp" << "*.SMP", QDir::Files);
+            std::sort(fileList.begin(), fileList.end());
         }
-        */
-        QDir directory(dir);
-        fileList = directory.entryList(QStringList() << "*.smp" << "*.SMP", QDir::Files);
-        std::sort(fileList.begin(), fileList.end());
+
+        if (dir.isEmpty())
+            return 0;
+    }
+    else {
+        fileList.push_back(fname);
     }
 
-    if (dir.isEmpty())
-        return 0;
     size_t nFiles = 0;
     size_t nSpecs = 0;
 
@@ -38,11 +39,10 @@ int SmpData::Load(std::string filePath, std::function<void(int)>  setProgressDlg
     m_maxSignal = 0.0;
     int pointsNum = 0;
     m_loadIsCanceled = false;
-
-//    QProgressDialog progress(tr("Loading files..."), tr("Stop"), 0, numFiles, this);
-//    progress.setWindowModality(Qt::WindowModal);
-    //connect(&progress, SIGNAL(canceled()), SLOT(progressDlgWasCanceled()));
-//    QObject::connect(&progress, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
+    
+    if (setMaximum != nullptr) {
+        setMaximum(numFiles);
+    }
 
     for (auto&& filePath : fileList)
     {
@@ -93,15 +93,16 @@ int SmpData::Load(std::string filePath, std::function<void(int)>  setProgressDlg
             pointsNum = i;
         }
         ++nFiles;
+        if (loadOneFileOnly) {
+            break;
+        }
     }
+
     if (setProgressDlgValue != nullptr)
     {
         setProgressDlgValue(nFiles);
     }
-    if (closeProgressDlg != nullptr)
-    {
-        closeProgressDlg();
-    }
+
     nSpecs = m_lstSpecData.size();
     if (nSpecs > 0) {
         size_t size = m_lstSpecData.at(0).size();

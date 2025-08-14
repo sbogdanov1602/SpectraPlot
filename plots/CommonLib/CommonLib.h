@@ -24,11 +24,7 @@ public:
 class COMMONLIB_API IPlotData
 {
 public:
-	IPlotData()
-	{
-		m_maxSignal = 0.0;
-		m_loadIsCanceled = false;
-	}
+	IPlotData();
 	virtual std::vector<std::vector<double>>& LstSpecData() = 0;
 	virtual std::vector<std::vector<double>>& LstSpecDataT() = 0;
 
@@ -36,7 +32,7 @@ public:
 	virtual float MeasurementStep() = 0;
 	virtual double SignalCoeff() = 0;
 
-	virtual int Load(std::string filePath, std::function<void (int)>  setProgressDlgValue/*void(*setProgressDlgValue)(int)*/, void (*closeProgressDlg)()) = 0;
+	virtual int Load(std::string filePath, std::function<void (int)>  setProgressDlgValue, std::function<void(int)>  setMaximum,  bool loadOneFileOnly) = 0;
 
 	virtual std::string MapXAxisLabel() = 0;
 	virtual std::string MapYAxisLabel() = 0;
@@ -47,15 +43,18 @@ public:
 
 	double GetMaxSignal() { return m_maxSignal; }
 	void SetMaxSignal(double value) { m_maxSignal = value; }
-	int PointsNum() { return (m_lstSpecData.size() > 0) ? m_lstSpecData[0].size() : 0; }
-	int SpectraNum() { return (m_lstSpecDataT.size() > 0) ? m_lstSpecDataT[0].size() : 0; }
 	void CancelLoad() { m_loadIsCanceled = true; }
 
+	int PointsNum();
+	int SpectraNum();
+	void ClearData();
 protected:
+
 	std::vector<std::vector<double>> m_lstSpecData;
 	std::vector<std::vector<double>> m_lstSpecDataT;
 	double m_maxSignal;
 	bool m_loadIsCanceled;
+
 	/*
 	double m_spectraNum;
 	double m_pointsNum;
