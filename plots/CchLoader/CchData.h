@@ -7,7 +7,6 @@ public:
 	CchData();
 	// Inherited via IPlotData
 	std::vector<std::vector<double>>& LstSpecData() override;
-	std::vector<std::vector<double>>& LstSpecDataT() override;
 	float PointScale() override;
 	float MeasurementStep() override;
 	double SignalCoeff() override;

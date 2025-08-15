@@ -103,28 +103,12 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
         setProgressDlgValue(nFiles);
     }
 
-    nSpecs = m_lstSpecData.size();
-    if (nSpecs > 0) {
-        size_t size = m_lstSpecData.at(0).size();
-        m_lstSpecDataT.resize(size);
-        for (int i = 0; i < nSpecs; i++) {
-            for (int j = 0; j < size; j++) {
-                auto v = m_lstSpecData[i][j];
-                m_lstSpecDataT[j].push_back(v);
-            }
-        }
-    }
     return nFiles;
 }
 
 std::vector<std::vector<double>>& SmpData::LstSpecData()
 {
     return m_lstSpecData;
-}
-
-std::vector<std::vector<double>>& SmpData::LstSpecDataT()
-{
-    return m_lstSpecDataT;
 }
 
 float SmpData::PointScale()

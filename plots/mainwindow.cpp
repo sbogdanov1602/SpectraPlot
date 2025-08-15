@@ -274,7 +274,7 @@ void MainWindow::onPlotClick(QCPAbstractPlottable* plottable, int dataIndex, QMo
     m_spectrumIdx = (int)(value / m_pPlotData->MeasurementStep());
     plotOneGraph(ui->customPlot2, m_pPlotData->LstSpecData()[m_spectrumIdx]);
     m_pointIdx = (int)(key / m_pointStep);
-    plotTwoGraph(ui->customPlotH, m_pPlotData->LstSpecDataT()[m_pointIdx]);
+    plotTwoGraph(ui->customPlotH, LstSpecDataT()[m_pointIdx]);
 
     auto signalValue = m_pPlotData->LstSpecData()[m_spectrumIdx].at(m_pointIdx);
 
@@ -393,8 +393,9 @@ void MainWindow::onOpenAction()
 
             auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
             auto ptrToSetMaximum = std::bind(&QProgressDialog::setMaximum, m_pProgressDlg, std::placeholders::_1);
-
+            
             retNFiles = m_pPlotData->Load(fname.toStdString(), ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
+            makeSpecDataT();
 
             QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
             m_pProgressDlg->close();
@@ -430,7 +431,7 @@ void MainWindow::onResetAction()
 
         ui->customPlot->rescaleAxes();
         plotOneGraph(ui->customPlot2, m_pPlotData->LstSpecData().at(0));
-        plotTwoGraph(ui->customPlotH, m_pPlotData->LstSpecDataT().at(0));
+        plotTwoGraph(ui->customPlotH, LstSpecDataT().at(0));
         
         ui->customPlotH->replot();
         ui->customPlot2->replot();
@@ -504,7 +505,7 @@ void MainWindow::setupColorDataMap(QCustomPlot* customPlot)
         // rescale the key (x) and value (y) axes so the whole color map is visible:
         customPlot->rescaleAxes();
         plotOneGraph(ui->customPlot2, m_pPlotData->LstSpecData().at(0));
-        plotTwoGraph(ui->customPlotH, m_pPlotData->LstSpecDataT().at(0));
+        plotTwoGraph(ui->customPlotH, LstSpecDataT().at(0));
         ui->customPlotH->replot();
         ui->customPlot2->replot();
 
@@ -728,7 +729,7 @@ void MainWindow::onCalculateIntegralAction()
 void MainWindow::onCalculateSummAction()
 {
     if (m_HSelectMap.Exists() && m_VSelectMap.Exists() && m_VSelectMap2.Exists()) {
-        C2DIntegralCalc integral2DCalc(m_VSelect.ItemLine(), m_HSelect.ItemLine(), m_pPlotData->LstSpecData(), m_pPlotData->LstSpecDataT(), &m_VPlotCursor, &m_HPlotCursor);
+        C2DIntegralCalc integral2DCalc(m_VSelect.ItemLine(), m_HSelect.ItemLine(), m_pPlotData->LstSpecData(), LstSpecDataT(), &m_VPlotCursor, &m_HPlotCursor);
         auto ret = integral2DCalc.Calculate();
         m_pIntegralModel->addNewData(ret);
 
@@ -781,9 +782,34 @@ void MainWindow::progressDlgWasCanceled()
         m_pPlotData->CancelLoad();
     }
     if (m_pProgressDlg != nullptr) {
-//        delete m_pProgressDlg;
-//        m_pProgressDlg = nullptr;
     }
+}
+
+void MainWindow::makeSpecDataT()
+{
+    if (m_pPlotData != nullptr) {
+        clearSpecDataT();
+        size_t nSpecs = m_pPlotData->LstSpecData().size();
+        if (nSpecs > 0) {
+            size_t size = m_pPlotData->LstSpecData().at(0).size();
+            m_lstSpecDataT.resize(size);
+            for (int i = 0; i < nSpecs; i++) {
+                for (int j = 0; j < size; j++) {
+                    auto v = m_pPlotData->LstSpecData()[i][j];
+                    m_lstSpecDataT[j].push_back(v);
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::clearSpecDataT()
+{
+    for (int i = 0; i < m_lstSpecDataT.size(); i++) {
+        auto vec = m_lstSpecDataT[i];
+        vec.clear();
+    }
+    m_lstSpecDataT.clear();
 }
 
 

@@ -8,7 +8,6 @@ public:
 	int Load(std::string filePath, std::function<void(int)>  setProgressDlgValue, std::function<void(int)>  setMaximum, bool loadOneFileOnly) override;
 	// Inherited via IPlotData
 	std::vector<std::vector<double>>& LstSpecData() override;
-	std::vector<std::vector<double>>& LstSpecDataT() override;
 	float PointScale() override;
 	float MeasurementStep() override;
 	double SignalCoeff() override;

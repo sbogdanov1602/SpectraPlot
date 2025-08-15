@@ -68,6 +68,7 @@ public:
   void setProgressDlgValue(int value);
   void closeProgressDlg();
   void progressDlgWasCanceled();
+  std::vector<std::vector<double>>& LstSpecDataT() { return m_lstSpecDataT; }
 
 public slots:
 	void onOpenAction();
@@ -127,7 +128,7 @@ private:
   Line m_HSelect;
   Line m_VSelect;
 
-  //CTextLabelResults m_LabelResults;
+  std::vector<std::vector<double>> m_lstSpecDataT;
 
   QCPColorMap* m_colorMap;
   QCPColorScale* m_colorScale;
@@ -143,6 +144,8 @@ private:
   void ClearLines();
   void ClearResults();
   void ClearCursors();
+  void makeSpecDataT();
+  void clearSpecDataT();
 
 private slots:
   void selectionChanged();

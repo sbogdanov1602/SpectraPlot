@@ -26,13 +26,12 @@ class COMMONLIB_API IPlotData
 public:
 	IPlotData();
 	virtual std::vector<std::vector<double>>& LstSpecData() = 0;
-	virtual std::vector<std::vector<double>>& LstSpecDataT() = 0;
 
 	virtual float PointScale() = 0;
 	virtual float MeasurementStep() = 0;
 	virtual double SignalCoeff() = 0;
 
-	virtual int Load(std::string filePath, std::function<void (int)>  setProgressDlgValue, std::function<void(int)>  setMaximum,  bool loadOneFileOnly) = 0;
+	virtual int Load(std::string filePath, std::function<void (int)>  setProgressDlgValue, std::function<void(int)>  setProgressDlgMaximum,  bool loadOneFileOnly) = 0;
 
 	virtual std::string MapXAxisLabel() = 0;
 	virtual std::string MapYAxisLabel() = 0;
@@ -51,17 +50,8 @@ public:
 protected:
 
 	std::vector<std::vector<double>> m_lstSpecData;
-	std::vector<std::vector<double>> m_lstSpecDataT;
 	double m_maxSignal;
 	bool m_loadIsCanceled;
-
-	/*
-	double m_spectraNum;
-	double m_pointsNum;
-	double m_pointStep;
-	double m_measurementStep;
-	double m_SignalCoeff;
-	*/
 };
 
 extern COMMONLIB_API int nCommonLib;
