@@ -1,0 +1,16 @@
+[
+{
+	"id": 1,
+	"ext": "smp",
+	"libName": "SmpLoader.dll",
+	"funcName": "GetIPlotData",
+	"loadOneFileOnly": false
+},
+{
+	"id": 2,
+	"ext": "cch",
+	"libName": "CchLoader.dll",
+	"funcName": "GetIPlotData",
+	"loadOneFileOnly": true
+}
+]
