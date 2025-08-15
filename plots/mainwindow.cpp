@@ -55,8 +55,9 @@
 #include <C2DIntegralCalc.h>
 #include "pd_alg/pd_alg.h"
 #include "pd_alg/pd_data.h"
-#include "SmpLoader/SmpLoader.h"
-#include "CchLoader/CchLoader.h"
+//#include "SmpLoader/SmpLoader.h"
+//#include "CchLoader/CchLoader.h"
+#include "Libraries.h"
 
 Ui_MainWindow;
 
@@ -127,6 +128,7 @@ MainWindow::MainWindow(QWidget *parent) :
       QScreen* screen = QGuiApplication::primaryScreen();
       resize(screen->availableSize() * 0.8);
   }
+  Dlls.Load();
 }
 
 void MainWindow::restoreWidgetsGeometry()
@@ -361,8 +363,6 @@ void MainWindow::onOpenAction()
             QString ext = fname.mid(pos + 1);
 
             m_fileList = directory.entryList(QStringList() << "*." + ext << "*." + ext.toUpper(), QDir::Files);
-            //std::sort(m_fileList.begin(), m_fileList.end());
-            //LoadSpectra();
 
             if (m_pPlotData != nullptr)
             {
@@ -370,45 +370,71 @@ void MainWindow::onOpenAction()
                 m_pPlotData = nullptr;
             }
             bool loadOneFileOnly = false;
-            ext = ext.toLower();
-            if (ext == "smp") {
-                m_pPlotData = smp::GetIPlotData();
-                loadOneFileOnly = false;
-            }
-            else if (ext == "cch") {
-                m_pPlotData = cch::GetIPlotData();
-                loadOneFileOnly = false;
-            }
-
-            if (m_pProgressDlg != nullptr) {
-                delete m_pProgressDlg;
-                m_pProgressDlg = nullptr;
-            }
-            int fileCount = (loadOneFileOnly) ? 1 : m_fileList.size();
-            m_pProgressDlg = new QProgressDialog(tr("Loading files..."), tr("Stop"), 0, fileCount, this);
-            m_pProgressDlg->setWindowModality(Qt::WindowModal);
-            QObject::connect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
-            m_pProgressDlg->show();
-            m_pProgressDlg->setValue(0);
-
-            auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
-            auto ptrToSetMaximum = std::bind(&QProgressDialog::setMaximum, m_pProgressDlg, std::placeholders::_1);
             
-            retNFiles = m_pPlotData->Load(fname.toStdString(), ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
-            makeSpecDataT();
+            clearPlots();
 
-            QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
-            m_pProgressDlg->close();
-            delete m_pProgressDlg;
-            m_pProgressDlg = nullptr;
+            ext = ext.toLower();
 
-            QMessageBox::information(
-                this,
-                "SMP files is loaded",
-                QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(m_pPlotData->SpectraNum()),
-                QMessageBox::StandardButton::Ok);
+            auto dllItem = Dlls.GetLib(ext);
 
-            setupColorDataMap(ui->customPlot);
+            if (dllItem != nullptr && dllItem->hmodule) {
+                
+                typedef IPlotData*(__cdecl* MYFUNCTION)(); /* __cdecl* __stdcall* */
+
+                auto s = dllItem->funcName.toStdString();
+                auto pStr = &(s[0]);
+
+                MYFUNCTION pFunction = (MYFUNCTION)GetProcAddress(dllItem->hmodule, pStr);
+                if (pFunction) {
+                    m_pPlotData = pFunction();
+                    if (m_pPlotData) {
+
+                        if (m_pProgressDlg != nullptr) {
+                            delete m_pProgressDlg;
+                            m_pProgressDlg = nullptr;
+                        }
+                        int fileCount = (loadOneFileOnly) ? 1 : m_fileList.size();
+                        m_pProgressDlg = new QProgressDialog(tr("Loading files..."), tr("Stop"), 0, fileCount, this);
+                        m_pProgressDlg->setWindowModality(Qt::WindowModal);
+                        QObject::connect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
+                        m_pProgressDlg->show();
+                        m_pProgressDlg->setValue(0);
+
+                        auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
+                        auto ptrToSetMaximum = std::bind(&QProgressDialog::setMaximum, m_pProgressDlg, std::placeholders::_1);
+
+                        retNFiles = m_pPlotData->Load(fname.toStdString(), ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
+                        makeSpecDataT();
+
+                        QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
+                        m_pProgressDlg->close();
+                        delete m_pProgressDlg;
+                        m_pProgressDlg = nullptr;
+
+                        QMessageBox::information(
+                            this,
+                            "SMP files is loaded",
+                            QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(m_pPlotData->SpectraNum()),
+                            QMessageBox::StandardButton::Ok);
+
+                        setupColorDataMap(ui->customPlot);
+                    }
+                }
+                else
+                {
+                    FreeLibrary(dllItem->hmodule); // Unload the DLL if function not found
+                    dllItem->hmodule = nullptr;
+                    QMessageBox::warning(this, "SpectraPlot", tr("Cannot find a function '%1' in module '%2'.").arg(dllItem->funcName).arg(dllItem->libName));
+                }
+            }
+            else {
+                if (dllItem == nullptr) {
+                    QMessageBox::warning(this, "SpectraPlot", tr("Cannot find a record about library for extension '%1'.").arg(ext));
+                }
+                else if (!dllItem->hmodule) {
+                    QMessageBox::warning(this, "SpectraPlot", tr("The library for extension '%1' isn't loaded.").arg(ext));
+                }
+            }
         }
     }
 }
@@ -440,17 +466,32 @@ void MainWindow::onResetAction()
     }
 }
 
+void MainWindow::clearPlots()
+{
+    ui->customPlot->clearGraphs();
+    ui->customPlot->clearPlottables();
+    ui->customPlot->clearItems();
+    ui->customPlotH->clearGraphs();
+    ui->customPlotH->clearPlottables();
+    ui->customPlotH->clearItems();
+    ui->customPlot2->clearGraphs();
+    ui->customPlot2->clearPlottables();
+    ui->customPlot2->clearItems();
+    
+    ui->customPlot->replot();
+    ui->customPlotH->replot();
+    ui->customPlot2->replot();
+}
+
 void MainWindow::setupColorDataMap(QCustomPlot* customPlot)
 {
     demoName = "Color Data Map";
     if(m_pPlotData != nullptr && m_pPlotData->LstSpecData().size() > 0)
     {
-        customPlot->clearGraphs();
-        customPlot->clearPlottables();
-        customPlot->clearItems();
         ClearLines();
         ClearResults();
         ClearCursors();
+        clearPlots();
         // configure axis rect:
         customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
         customPlot->axisRect()->setupFullAxesBox(true);

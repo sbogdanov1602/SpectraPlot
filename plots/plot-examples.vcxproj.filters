@@ -70,6 +70,9 @@
     <ClCompile Include="IntegralModel.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="Libraries.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mainwindow.h">
@@ -120,8 +123,12 @@
     <ClInclude Include="IntegralTableView.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="Libraries.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="SpectraPlot.json" />
+    <None Include="Libraries.json" />
   </ItemGroup>
 </Project>

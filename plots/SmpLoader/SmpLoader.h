@@ -6,8 +6,8 @@ class IPlotData;
 
 extern SmpData SmpDataInstance;
 
-namespace smp
+extern "C" SMPLOADER_EXPORT IPlotData* GetIPlotData(void)
 {
-    SMPLOADER_EXPORT IPlotData* GetIPlotData(void);
+    return &SmpDataInstance;
 }
 
