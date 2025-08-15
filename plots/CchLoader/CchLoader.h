@@ -6,8 +6,8 @@ class IPlotData;
 
 extern CchData CchDataInstance;
 
-namespace cch
+extern "C" CCHLOADER_EXPORT IPlotData* GetIPlotData(void)
 {
-    CCHLOADER_EXPORT IPlotData* GetIPlotData(void);
+    return &CchDataInstance;
 }
 

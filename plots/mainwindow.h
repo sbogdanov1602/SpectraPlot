@@ -146,6 +146,7 @@ private:
   void ClearCursors();
   void makeSpecDataT();
   void clearSpecDataT();
+  void clearPlots();
 
 private slots:
   void selectionChanged();
