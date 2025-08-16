@@ -106,11 +106,6 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
     return nFiles;
 }
 
-std::vector<std::vector<double>>& SmpData::LstSpecData()
-{
-    return m_lstSpecData;
-}
-
 float SmpData::PointScale()
 {
     return 24.0f;
@@ -136,22 +131,7 @@ std::string SmpData::MapYAxisLabel()
     return "t (sec)";
 }
 
-std::string SmpData::HXAxisLabel()
-{
-    return "t (ms)";
-}
-
-std::string SmpData::HYAxisLabel()
-{
-    return "signal (V)";
-}
-
-std::string SmpData::VYAxisLabel()
-{
-    return "t (sec)";
-}
-
-std::string SmpData::VXAxisLabel()
+std::string SmpData::SignalAxisLabel()
 {
     return "signal (V)";
 }

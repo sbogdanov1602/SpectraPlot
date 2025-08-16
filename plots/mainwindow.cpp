@@ -192,8 +192,8 @@ void MainWindow::plotOneGraph(QCustomPlot* customPlot, std::vector<double> in)
     }
     customPlot->graph(0)->setData(x, y);
     // give the axes some labels:
-    customPlot->xAxis->setLabel(QString(&(m_pPlotData->HXAxisLabel()[0]))/*"t (ms)"*/);
-    customPlot->yAxis->setLabel(QString(&(m_pPlotData->HYAxisLabel()[0]))/*"signal (V)"*/);
+    customPlot->xAxis->setLabel(QString(&(m_pPlotData->MapXAxisLabel()[0]))/*"t (ms)"*/);
+    customPlot->yAxis->setLabel(QString(&(m_pPlotData->SignalAxisLabel()[0]))/*"signal (V)"*/);
     // set axes ranges, so we see all data:
     customPlot->xAxis->setRange(0, m_pointStep * (m_pPlotData->PointsNum() - 1));
     customPlot->yAxis->setRange(0, m_pPlotData->GetMaxSignal());
@@ -232,8 +232,8 @@ void MainWindow::plotTwoGraph(QCustomPlot* customPlot, std::vector<double> in)
 
     customPlot->graph(0)->setData(x, y);
     // give the axes some labels:
-    customPlot->yAxis->setLabel(QString(&(m_pPlotData->VYAxisLabel()[0]))/*"t (sec)"*/);
-    customPlot->xAxis->setLabel(QString(&(m_pPlotData->VXAxisLabel()[0]))/*"signal (V)"*/);
+    customPlot->yAxis->setLabel(QString(&(m_pPlotData->MapYAxisLabel()[0]))/*"t (sec)"*/);
+    customPlot->xAxis->setLabel(QString(&(m_pPlotData->SignalAxisLabel()[0]))/*"signal (V)"*/);
     // set axes ranges, so we see all data:
     customPlot->yAxis->setRange(0, (m_pPlotData->SpectraNum() - 1) * m_pPlotData->MeasurementStep());
     customPlot->xAxis->setRange(0, m_pPlotData->GetMaxSignal());
