@@ -51,11 +51,15 @@ void Libraries::Load()
 					dll.hmodule = ::LoadLibraryA(pC);
 					if (dll.hmodule) {
 						m_Libs[dll.ext] = dll;
+						m_FileFilter += " *." + dll.ext;
 					}
 					else {
 						QMessageBox::warning(nullptr, "SpectraPlot", QObject::tr("Cannot find a library '%1'.").arg(dll.libName));
 					}
 				}
+			}
+			if (!m_FileFilter.isEmpty()) {
+				m_FileFilter = "(" + m_FileFilter.mid(1) + ")";
 			}
 		}
 	}

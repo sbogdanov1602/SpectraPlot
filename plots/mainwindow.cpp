@@ -340,9 +340,9 @@ void MainWindow::onOpenAction()
 {
     int retNFiles = 0;
     auto curDir = QDir::current();
-    QString filter("*.smp *.cch");
+    QString filter = Dlls.FileFilter();
     auto fname = QFileDialog::getOpenFileName(this, tr("Open Directory"),
-        m_dir.isEmpty() ? curDir.dirName() : m_dir, "(*.smp *.cch)", &filter, QFileDialog::Option::ReadOnly);
+        m_dir.isEmpty() ? curDir.dirName() : m_dir, filter, &filter, QFileDialog::Option::ReadOnly);
 
     auto pos = fname.lastIndexOf('/');
     setWindowTitle(QCoreApplication::translate("MainWindow", "SpectraPlot", nullptr));
@@ -387,6 +387,7 @@ void MainWindow::onOpenAction()
                 MYFUNCTION pFunction = (MYFUNCTION)GetProcAddress(dllItem->hmodule, pStr);
                 if (pFunction) {
                     m_pPlotData = pFunction();
+                    loadOneFileOnly = dllItem->loadOneFileOnly;
                     if (m_pPlotData) {
 
                         if (m_pProgressDlg != nullptr) {
@@ -413,7 +414,7 @@ void MainWindow::onOpenAction()
 
                         QMessageBox::information(
                             this,
-                            "SMP files is loaded",
+                            "Files are loaded",
                             QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(m_pPlotData->SpectraNum()),
                             QMessageBox::StandardButton::Ok);
 

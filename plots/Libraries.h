@@ -20,9 +20,11 @@ public:
 	~Libraries();
 	void Load();
 	jsonLib* GetLib(QString& ext);
+	QString FileFilter() { return m_FileFilter; }
 private:
 	QString m_FileName;
 	QMap<QString, jsonLib> m_Libs;
+	QString m_FileFilter;
 };
 
 extern Libraries Dlls;
