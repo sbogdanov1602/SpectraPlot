@@ -4,6 +4,10 @@
 
 SmpData::SmpData():IPlotData()
 {
+    m_dBaseLine = 0.0;
+    m_iMeanValIndex = 100;
+    m_iMeaningAreaBeg = 171;
+    m_iMeaningAreaLength = 100;
 }
 
 int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressDlgValue, std::function<void(int)>  setMaximum, bool loadOneFileOnly)
@@ -78,9 +82,20 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
             bool ok = false;
 
             double val = line.toInt(&ok);
+
             if (!ok)
                 break;
+
             val *= SignalCoeff();
+            if (nFiles == 0 && i == m_iMeanValIndex) {
+                m_dBaseLine = val;
+                CorrectDataToBase(vec);
+            }
+            val -= m_dBaseLine;
+            if (val < 0.0) {
+                val = 0.0;
+            }
+
             if (m_maxSignal < val) {
                 m_maxSignal = val;
             }
@@ -93,6 +108,7 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
             pointsNum = i;
         }
         ++nFiles;
+
         if (loadOneFileOnly) {
             break;
         }
@@ -104,6 +120,33 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
     }
 
     return nFiles;
+}
+
+void SmpData::CalculateBaseLine(std::vector<double>& data)
+{
+    int m_dBaseLine = 0.0;
+/*
+    for (int i = m_iMeaningAreaBeg; (i < m_iMeaningAreaBeg + m_iMeaningAreaLength) && i < data.size(); i++)
+    {
+        if (i != m_iMeaningAreaBeg)
+        {
+            int n = i - m_iMeaningAreaBeg;
+            m_dBaseLine = (m_dBaseLine * n + data[i]) / (n + 1);
+        }
+        else
+        {
+            m_dBaseLine = data[i];
+        }
+    }
+*/
+}
+
+void SmpData::CorrectDataToBase(std::vector<double>& data)
+{
+    for (int i = data.size() - 1; i >= 2; i--)
+    {
+        data[i] = data[i] - m_dBaseLine;
+    }
 }
 
 float SmpData::PointScale()

@@ -32,6 +32,8 @@ public:
     QAction *actionReset;
     QAction *actionCalculate_integral;
     QAction *actionCalculate_summ;
+    QAction *actionSet_base_cursor;
+    QAction *actionRemove_base_cursor;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QSplitter *splitter_3;
@@ -60,6 +62,10 @@ public:
         actionCalculate_integral->setObjectName("actionCalculate_integral");
         actionCalculate_summ = new QAction(MainWindow);
         actionCalculate_summ->setObjectName("actionCalculate_summ");
+        actionSet_base_cursor = new QAction(MainWindow);
+        actionSet_base_cursor->setObjectName("actionSet_base_cursor");
+        actionRemove_base_cursor = new QAction(MainWindow);
+        actionRemove_base_cursor->setObjectName("actionRemove_base_cursor");
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName("centralWidget");
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -114,6 +120,8 @@ public:
         menuView->addAction(actionReset);
         menuTools->addAction(actionCalculate_integral);
         menuTools->addAction(actionCalculate_summ);
+        menuTools->addAction(actionSet_base_cursor);
+        menuTools->addAction(actionRemove_base_cursor);
 
         retranslateUi(MainWindow);
 
@@ -127,6 +135,8 @@ public:
         actionReset->setText(QCoreApplication::translate("MainWindow", "Reset", nullptr));
         actionCalculate_integral->setText(QCoreApplication::translate("MainWindow", "Calculate integral", nullptr));
         actionCalculate_summ->setText(QCoreApplication::translate("MainWindow", "Calculate 2D integral", nullptr));
+        actionSet_base_cursor->setText(QCoreApplication::translate("MainWindow", "Set base cursor", nullptr));
+        actionRemove_base_cursor->setText(QCoreApplication::translate("MainWindow", "Remove base cursor", nullptr));
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
         menuView->setTitle(QCoreApplication::translate("MainWindow", "View", nullptr));
         menuTools->setTitle(QCoreApplication::translate("MainWindow", "Tools", nullptr));

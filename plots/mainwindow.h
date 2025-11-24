@@ -79,6 +79,8 @@ public slots:
 	void onResetAction();
 	void onCalculateIntegralAction();
 	void onCalculateSummAction();
+	void onSetBaseCursor();
+	void onRemoveBaseCursor();
 private:
   Ui::MainWindow *ui;
   QString demoName;
@@ -128,6 +130,8 @@ private:
   Line m_HSelect;
   Line m_VSelect;
 
+  BaseCursor m_BaseCursor;
+
   std::vector<std::vector<double>> m_lstSpecDataT;
 
   QCPColorMap* m_colorMap;
@@ -147,6 +151,7 @@ private:
   void makeSpecDataT();
   void clearSpecDataT();
   void clearPlots();
+  void updateSetBaseCursorAction(bool b);
 
 private slots:
   void selectionChanged();

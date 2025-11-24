@@ -66,6 +66,8 @@
     </property>
     <addaction name="actionCalculate_integral"/>
     <addaction name="actionCalculate_summ"/>
+    <addaction name="actionSet_base_cursor"/>
+    <addaction name="actionRemove_base_cursor"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -89,6 +91,16 @@
   <action name="actionCalculate_summ">
    <property name="text">
     <string>Calculate 2D integral</string>
+   </property>
+  </action>
+  <action name="actionSet_base_cursor">
+   <property name="text">
+    <string>Set base cursor</string>
+   </property>
+  </action>
+  <action name="actionRemove_base_cursor">
+   <property name="text">
+    <string>Remove base cursor</string>
    </property>
   </action>
  </widget>

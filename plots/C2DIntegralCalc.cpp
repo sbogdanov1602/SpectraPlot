@@ -30,14 +30,14 @@ int2Dresult C2DIntegralCalc::Calculate()
 	double stepV = gSettings.GetMeasurementStep();
 	m_leftY = m_startIdx = (int)(start_val / stepV);
 	m_rightY = m_endIdx = (int)(end_val / stepV);
-
+/*
 	if (m_hCursor != nullptr) {
 		start_val = m_hCursor->ItemLine().start->value();
 		m_startIdx = (int)(start_val / stepV);
 		m_endIdx = m_startIdx + 1;
 		int m = 0;
 	}
-
+*/
 	QCPItemPosition* endx = m_hLine.end;
 	QCPItemPosition* startx = m_hLine.start;
 	double startx_key = startx->key();
@@ -45,20 +45,20 @@ int2Dresult C2DIntegralCalc::Calculate()
 	double stepH = gSettings.GetPointScale() / gSettings.GetPointsNum();
 	m_leftX = m_startx_idx = (int)(startx_key / stepH);
 	m_rightX = m_endx_idx = (int)(endx_key / stepH);
-
+/*
 	if (m_vCursor != nullptr) {
 		startx_key = m_vCursor->ItemLine().start->key();
 		m_startx_idx = (int)(startx_key / stepH);
 		m_endx_idx = m_startx_idx + 1;
 		int m = 0;
 	}
-
+*/
 	size_t spCount = m_LstSpecDataT.at(0).size();	
-	int leftV = spCount, rightV = 0, avgNoiseV = 0;
+	int leftV = spCount, rightV = m_rightY, avgNoiseV = 0;
 	CalculateVInterval(leftV, rightV, avgNoiseV);
 
 	size_t count = m_LstSpecData.at(0).size();
-	int leftH = count, rightH = 0, avgNoiseH = 0;
+	int leftH = count, rightH = 0, avgNoiseH = 0; 
 	CalculateHInterval(leftH, rightH, avgNoiseH);
 
 	double avgNoise = (avgNoiseH + avgNoiseV) * 0.5 * gSettings.GetSignalCoeff();
@@ -71,8 +71,8 @@ int2Dresult C2DIntegralCalc::Calculate()
 	double result = 0.0;
 	for (int i = leftV; i <= rightV; i++) {
 		for (int j = leftH; j < rightH; j++) {
-			result += (m_LstSpecData[i][j] + m_LstSpecData[i + 1][j] + m_LstSpecData[i][j + 1] + m_LstSpecData[i + 1][j + 1] - 4.0 * avgNoise) / 4.0 * stepH * stepV;
-			// - 4.0 * avgNoise        - the noise part of integral has to be removed
+			result += (m_LstSpecData[i][j] + m_LstSpecData[i + 1][j] + m_LstSpecData[i][j + 1] + m_LstSpecData[i + 1][j + 1] /* - 4.0 * avgNoise*/) / 4.0 * stepH * stepV;
+			// - 4.0 * avgNoise        - the noise part of integral
 		}
 	}
 	int2Dresult ret;

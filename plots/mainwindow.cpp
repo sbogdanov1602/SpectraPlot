@@ -92,6 +92,10 @@ MainWindow::MainWindow(QWidget *parent) :
   setGeometry(400, 250, 1200, 700);
   QObject::connect(ui->actionOpen, &QAction::triggered, this, qOverload<>(&MainWindow::onOpenAction));
   QObject::connect(ui->actionReset, &QAction::triggered, this, qOverload<>(&MainWindow::onResetAction));
+  
+  QObject::connect(ui->actionRemove_base_cursor, &QAction::triggered, this, qOverload<>(&MainWindow::onRemoveBaseCursor));
+  QObject::connect(ui->actionSet_base_cursor, &QAction::triggered, this, qOverload<>(&MainWindow::onSetBaseCursor));
+
   QObject::connect(ui->actionCalculate_integral, &QAction::triggered, this, qOverload<>(&MainWindow::onCalculateIntegralAction));
   QObject::connect(ui->actionCalculate_summ, &QAction::triggered, this, qOverload<>(&MainWindow::onCalculateSummAction));
 
@@ -128,6 +132,9 @@ MainWindow::MainWindow(QWidget *parent) :
       QScreen* screen = QGuiApplication::primaryScreen();
       resize(screen->availableSize() * 0.8);
   }
+
+  updateSetBaseCursorAction(true);
+
   Dlls.Load();
 }
 
@@ -281,13 +288,19 @@ void MainWindow::onPlotClick(QCPAbstractPlottable* plottable, int dataIndex, QMo
     auto signalValue = m_pPlotData->LstSpecData()[m_spectrumIdx].at(m_pointIdx);
 
     m_HeatMapHCursor.CreateHCursor(ui->customPlot, QPointF(keyRange.lower, value), QPointF(keyRange.upper, value), QPointF(value, signalValue));
-    m_HeatMapVCursor.CreateVCursor(ui->customPlot, QPointF(key, valueRange.lower), QPointF(key, valueRange.upper), QPointF(key, signalValue));
+    m_HeatMapVCursor.CreateVCursor(ui->customPlot, QPointF(key, valueRange.lower), QPointF(key, valueRange.upper), QPointF(key, signalValue), &m_BaseCursor);
 
     auto range = ui->customPlotH->graph(0)->valueAxis()->range();
     m_HPlotCursor.CreateHCursor(ui->customPlotH, QPointF(range.lower, value), QPointF(range.upper, value), QPointF(value, signalValue));
 
     range = ui->customPlot2->graph(0)->valueAxis()->range();
-    m_VPlotCursor.CreateVCursor(ui->customPlot2, QPointF(key, range.lower), QPointF(key, range.upper), QPointF(key, signalValue));
+    m_VPlotCursor.CreateVCursor(ui->customPlot2, QPointF(key, range.lower), QPointF(key, range.upper), QPointF(key, signalValue), &m_BaseCursor);
+    //m_VPlotCursor.CreateVCursor(ui->customPlot2, QPointF(key, range.lower), QPointF(key, value*1.05), QPointF(key, signalValue), &m_BaseCursor);
+    
+    if (m_BaseCursor.Exists()) {
+        m_BaseCursor.ClearCursor();
+        m_BaseCursor.Create(ui->customPlot2, &m_HSelect.ItemLine(), &m_pPlotData->LstSpecData(), m_spectrumIdx);
+    }
 
     ui->customPlotH->replot();
     ui->customPlot2->replot();
@@ -327,10 +340,10 @@ void MainWindow::onPlotVClick(QCPAbstractPlottable* plottable, int dataIndex, QM
     auto valueRange = plottable->getValueRange(b1);
 
     auto range = ui->customPlot->yAxis->range();
-    m_HeatMapVCursor.CreateVCursor(ui->customPlot, QPointF(key, range.lower), QPointF(key, range.upper), QPointF(key, value));
+    m_HeatMapVCursor.CreateVCursor(ui->customPlot, QPointF(key, range.lower), QPointF(key, range.upper), QPointF(key, value), &m_BaseCursor);
 
     range = ui->customPlot2->graph(0)->valueAxis()->range();
-    m_VPlotCursor.CreateVCursor(ui->customPlot2, QPointF(key, range.lower), QPointF(key, range.upper), QPointF(key, value));
+    m_VPlotCursor.CreateVCursor(ui->customPlot2, QPointF(key, range.lower), QPointF(key, range.upper), QPointF(key, value), &m_BaseCursor);
 
     ui->customPlot2->replot();
     ui->customPlot->replot();
@@ -527,7 +540,7 @@ void MainWindow::setupColorDataMap(QCustomPlot* customPlot)
         customPlot->plotLayout()->addElement(0, 1, m_colorScale); // add it to the right of the main axis rect
         m_colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
         m_colorMap->setColorScale(m_colorScale); // associate the color map with the color scale
-        m_colorScale->axis()->setLabel("Magnetic Field Strength");
+        m_colorScale->axis()->setLabel("signal / max. signal");
         m_colorScale->setRangeZoom(false);
         m_colorScale->setRangeDrag(false);
 
@@ -853,6 +866,29 @@ void MainWindow::clearSpecDataT()
     }
     m_lstSpecDataT.clear();
 }
+
+void MainWindow::onSetBaseCursor()
+{
+    if (m_HSelect.Exists()) {
+        m_BaseCursor.Create(ui->customPlot2, &m_HSelect.ItemLine(), &m_pPlotData->LstSpecData(), m_spectrumIdx);
+        ui->customPlot2->replot();
+        updateSetBaseCursorAction(false);
+    }
+}
+
+void MainWindow::onRemoveBaseCursor()
+{
+    m_BaseCursor.Clear();
+    ui->customPlot2->replot();
+    updateSetBaseCursorAction(true);
+}
+
+void MainWindow::updateSetBaseCursorAction(bool bEnabled)
+{
+    ui->actionSet_base_cursor->setEnabled(bEnabled);
+    ui->actionRemove_base_cursor->setEnabled(!bEnabled);
+}
+
 
 
 
