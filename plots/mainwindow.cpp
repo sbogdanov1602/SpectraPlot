@@ -61,10 +61,14 @@
 
 Ui_MainWindow;
 
+int gGlobalId;
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow)
 {
+  gGlobalId = 0;
+
   m_pPlotData = nullptr;
   m_pProgressDlg = nullptr;
   m_dir = QApplication::applicationDirPath();
@@ -786,6 +790,9 @@ void MainWindow::onCalculateSummAction()
     if (m_HSelectMap.Exists() && m_VSelectMap.Exists() && m_VSelectMap2.Exists()) {
         C2DIntegralCalc integral2DCalc(m_VSelect.ItemLine(), m_HSelect.ItemLine(), m_pPlotData->LstSpecData(), LstSpecDataT(), &m_VPlotCursor, &m_HPlotCursor);
         auto ret = integral2DCalc.Calculate();
+        if (m_BaseCursor.Exists()) {
+            ret.ratio = ret.peakPosX / m_BaseCursor.GetPosition();
+        }
         m_pIntegralModel->addNewData(ret);
 
         double y = m_HSelect.ItemLine().start->value();
@@ -870,9 +877,13 @@ void MainWindow::clearSpecDataT()
 void MainWindow::onSetBaseCursor()
 {
     if (m_HSelect.Exists()) {
-        m_BaseCursor.Create(ui->customPlot2, &m_HSelect.ItemLine(), &m_pPlotData->LstSpecData(), m_spectrumIdx);
+        Result ret = m_BaseCursor.Create(ui->customPlot2, &m_HSelect.ItemLine(), &m_pPlotData->LstSpecData(), m_spectrumIdx);
+        m_pIntegralModel->addNewData(ret);
         ui->customPlot2->replot();
         updateSetBaseCursorAction(false);
+    }
+    else {
+        QMessageBox::warning(this, tr("SpectraPlot"), tr("Select horizontal interval to find a peak."));
     }
 }
 
@@ -880,6 +891,13 @@ void MainWindow::onRemoveBaseCursor()
 {
     m_BaseCursor.Clear();
     ui->customPlot2->replot();
+    QModelIndex qidx = m_pIntegralModel->findById(BASE_CURSOR_ID);
+    if (qidx.isValid()) {
+        QModelIndexList l;
+        l.append(qidx);
+        m_pIntegralModel->deleteData(l);
+        ui->tableViewH_2->repaint();
+    }
     updateSetBaseCursorAction(true);
 }
 

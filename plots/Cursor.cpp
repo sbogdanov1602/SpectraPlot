@@ -1,6 +1,7 @@
 #include "Cursor.h"
 #include <Settings.h>
 #include "pd_alg/pd_alg.h"
+#include <Common.h>
 
 Line::Line() {
     m_line = nullptr;
@@ -106,7 +107,7 @@ void BaseCursor::ClearData()
 }
 
 
-void BaseCursor::Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<std::vector<double>>* lstSpecData, int iSpecIndx)
+Result  BaseCursor::Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<std::vector<double>>* lstSpecData, int iSpecIndx)
 {
     m_plot = plot;
     if (!m_bExists) {
@@ -136,6 +137,12 @@ void BaseCursor::Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<std::
     auto vecPeaks = PDAlg::PeaksDetecting(pData, count, 1.0, &algParams);
     delete pData;
 
+    Result ret;
+    ret.description = BASE_PEAK_NAME;
+    ret.time = QTime::currentTime().toString();
+    ret.date = QDate::currentDate().toString();
+    ret.id = BASE_CURSOR_ID;
+
     if (vecPeaks.size() > 0) {
         int max = 0, max_idx = 0;
         for (int idx = 0; idx < vecPeaks.size(); idx++) {
@@ -149,8 +156,16 @@ void BaseCursor::Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<std::
         m_dPeakPos = max_idx * stepH;
         auto signalValue = max * gSettings.GetSignalCoeff();
 
+        ret.piakHight = signalValue;
+        ret.peakPosX = m_dPeakPos;
+        ret.peakPosY = iSpecIndx * gSettings.GetMeasurementStep();
+        ret.ratio = 1.0;
+        ret.leftX = m_dStartx_key;
+        ret.rightX = m_dEndx_key;
+
         m_bExists = true;
         auto range = m_plot->graph(0)->valueAxis()->range();
         CreateVCursor(m_plot, QPointF(m_dPeakPos, range.lower), QPointF(m_dPeakPos, range.upper), QPointF(m_dPeakPos, signalValue), this, QPen(Qt::red));
     }
+    return ret;
 }

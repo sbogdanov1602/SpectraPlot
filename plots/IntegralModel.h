@@ -13,11 +13,12 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    void addNewData(int2Dresult value);
+    void addNewData(Result value);
     void deleteData(QModelIndexList indexes);
     void deleteAllData();
     void saveToCsvFile();
+    QModelIndex findById(int id);
 private:
-    QList<int2Dresult> m_Results;
+    QList<Result> m_Results;
 };
 

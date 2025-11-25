@@ -1,5 +1,6 @@
 #pragma once
 #include "qcustomplot.h"
+#include <Common.h>
 
 using namespace Qt;
 
@@ -33,7 +34,7 @@ class BaseCursor : public Cursor
 {
 public: 
 	BaseCursor();
-	void Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<std::vector<double>>* lstSpecData, int iSpecIndx);
+	Result Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<std::vector<double>>* lstSpecData, int iSpecIndx);
 	void Clear();
 	bool Exists() { return m_bExists; }
 	double GetPosition() { return m_dPeakPos; }

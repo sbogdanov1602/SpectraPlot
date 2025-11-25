@@ -21,7 +21,7 @@ C2DIntegralCalc::C2DIntegralCalc(QCPItemLine& vLine, QCPItemLine& hLine
 {
 }
 
-int2Dresult C2DIntegralCalc::Calculate()
+Result C2DIntegralCalc::Calculate()
 {
 	QCPItemPosition* end = m_vLine.end;
 	QCPItemPosition* start = m_vLine.start;
@@ -59,7 +59,7 @@ int2Dresult C2DIntegralCalc::Calculate()
 
 	size_t count = m_LstSpecData.at(0).size();
 	int leftH = count, rightH = 0, avgNoiseH = 0; 
-	CalculateHInterval(leftH, rightH, avgNoiseH);
+	auto max_peak = CalculateHInterval(leftH, rightH, avgNoiseH);
 
 	double avgNoise = (avgNoiseH + avgNoiseV) * 0.5 * gSettings.GetSignalCoeff();
 
@@ -71,11 +71,15 @@ int2Dresult C2DIntegralCalc::Calculate()
 	double result = 0.0;
 	for (int i = leftV; i <= rightV; i++) {
 		for (int j = leftH; j < rightH; j++) {
-			result += (m_LstSpecData[i][j] + m_LstSpecData[i + 1][j] + m_LstSpecData[i][j + 1] + m_LstSpecData[i + 1][j + 1] /* - 4.0 * avgNoise*/) / 4.0 * stepH * stepV;
+			double addVal = (m_LstSpecData[i][j] + m_LstSpecData[i + 1][j] + m_LstSpecData[i][j + 1] + m_LstSpecData[i + 1][j + 1] - 4.0 * avgNoise) / 4.0 * stepH * stepV;
 			// - 4.0 * avgNoise        - the noise part of integral
+			result += addVal > 0.0 ? addVal : 0.0;
 		}
 	}
-	int2Dresult ret;
+	Result ret;
+	ret.piakHight = max_peak.max_peakHeight * gSettings.GetSignalCoeff();
+	ret.peakPosX = max_peak.max_point_idx * stepH;
+	ret.peakPosY = max_peak.max_spectr_idx * stepV;
 	ret.value = result;
 	ret.leftX = beg_h;
 	ret.rightX = end_h;
@@ -83,6 +87,7 @@ int2Dresult C2DIntegralCalc::Calculate()
 	ret.rightY = end_v;
 	ret.time = QTime::currentTime().toString();
 	ret.date = QDate::currentDate().toString();
+	ret.description = VALUE_COLUMN_NAME;
 	return ret;
 }
 
@@ -106,11 +111,12 @@ void C2DIntegralCalc::CalculateVInterval(int& leftV, int& rightV, int& avgNoise)
 		auto vecPeaks = PDAlg::PeaksDetecting(pData, spCount, 1.0, &algParams);
 		delete pData;
 		avgNoise = algParams.iNoiseLevel / gSettings.GetNoiseRate();
-		CalculateMaxPeakInterval(vecPeaks, leftV, rightV);
+		int max_height = 0, max_height_idx = 0;
+		CalculateMaxPeakInterval(vecPeaks, leftV, rightV, max_height, max_height_idx);
 	}
 }
 
-void C2DIntegralCalc::CalculateHInterval(int& leftH, int& rightH, int& avgNoise)
+C2DIntegralCalc::max_peak C2DIntegralCalc::CalculateHInterval(int& leftH, int& rightH, int& avgNoise)
 {
 	auto algParams = TPDAlgParams();
 	algParams.bAutoNoise = true;
@@ -121,7 +127,7 @@ void C2DIntegralCalc::CalculateHInterval(int& leftH, int& rightH, int& avgNoise)
 	algParams.iNoiseRate = gSettings.GetNoiseRate();
 	
 	size_t count = m_LstSpecData.at(0).size();
-
+	max_peak max_peak_data;
 	for (int i = m_startIdx; i < m_endIdx; i++) {
 		int* pData = new int[count];
 		for (int k = 0; k < count; k++) {
@@ -130,11 +136,18 @@ void C2DIntegralCalc::CalculateHInterval(int& leftH, int& rightH, int& avgNoise)
 		auto vecPeaks = PDAlg::PeaksDetecting(pData, count, 1.0, &algParams);
 		delete pData;
 		avgNoise = algParams.iNoiseLevel / gSettings.GetNoiseRate();
-		CalculateMaxPeakInterval(vecPeaks, leftH, rightH);
+		int max_height = 0, max_height_idx = 0;
+		CalculateMaxPeakInterval(vecPeaks, leftH, rightH, max_height, max_height_idx);
+		if (max_height > max_peak_data.max_peakHeight) {
+			max_peak_data.max_peakHeight = max_height;
+			max_peak_data.max_point_idx = max_height_idx;
+			max_peak_data.max_spectr_idx = i;
+		}
 	}
+	return max_peak_data;
 }
 
-void C2DIntegralCalc::CalculateMaxPeakInterval(std::vector<TPeak>& vecPeaks, int& left, int& right)
+void C2DIntegralCalc::CalculateMaxPeakInterval(std::vector<TPeak>& vecPeaks, int& left, int& right, int& max_height, int& max_height_idx)
 {
 	int beg_idx2 = 0;
 	int end_idx2 = 0;
@@ -148,8 +161,10 @@ void C2DIntegralCalc::CalculateMaxPeakInterval(std::vector<TPeak>& vecPeaks, int
 			}
 			idx++;
 		}
-		beg_idx2 = (int)vecPeaks[max_idx].LeftBound;
-		end_idx2 = (int)vecPeaks[max_idx].RightBound;
+		beg_idx2 = vecPeaks[max_idx].LeftBound;
+		end_idx2 = vecPeaks[max_idx].RightBound;
+		max_height = max;
+		max_height_idx = vecPeaks[max_idx].Extrem;
 		if (beg_idx2 < left) {
 			left = beg_idx2;
 		}

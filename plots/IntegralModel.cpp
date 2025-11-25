@@ -2,18 +2,10 @@
 #include <qdir.h>
 #include <qfiledialog.h>
 
-const QString VALUE_COLUMN_NAME(QObject::tr("2D integral"));
-const QString LEFT_X_COLUMN_NAME(QObject::tr("Left X"));
-const QString RIGHT_X_COLUMN_NAME(QObject::tr("Right X"));
-const QString LEFT_Y_COLUMN_NAME(QObject::tr("Bottom Y"));
-const QString RIGHT_Y_COLUMN_NAME(QObject::tr("Top Y"));
-const QString TIME_COLUMN_NAME(QObject::tr("Time"));
-const QString DATE_COLUMN_NAME(QObject::tr("Date"));
-
 IntegralModel::IntegralModel(QObject* parent) : QAbstractTableModel(parent)
 {
 }
-void  IntegralModel::addNewData(int2Dresult value) {
+void  IntegralModel::addNewData(Result value) {
     beginInsertRows(QModelIndex(), 0, 0);
     {
         m_Results.push_front(value);
@@ -72,7 +64,9 @@ void IntegralModel::saveToCsvFile()
                 file.close();
             }
             else {
-                str = VALUE_COLUMN_NAME + "," + LEFT_X_COLUMN_NAME + "," + RIGHT_X_COLUMN_NAME + "," + LEFT_Y_COLUMN_NAME;
+                str = VALUE_COLUMN_NAME + "," + PEAK_HEIGHT_COLUMN_NAME + "," + PEAK_POS_X_COLUMN_NAME + ",";
+                str += PEAK_POS_Y_COLUMN_NAME + "," + RATIO_POS_COLUMN_NAME + "," + DESCRIPT_COLUMN_NAME + ",";
+                str += LEFT_X_COLUMN_NAME + "," + RIGHT_X_COLUMN_NAME + "," + LEFT_Y_COLUMN_NAME;
                 str += "," + RIGHT_Y_COLUMN_NAME + "," + TIME_COLUMN_NAME + "," + DATE_COLUMN_NAME + "\n";
 
                 QTextStream out(&file);
@@ -80,8 +74,10 @@ void IntegralModel::saveToCsvFile()
 
                 for (auto it = m_Results.begin(); it != m_Results.end(); it++)
                 {
-                    str = QString::asprintf("%8.4f,%7.3f,%7.3f,%8.2f,%8.2f"
-                        , it->value, it->leftX, it->rightX, it->leftY, it->rightY);
+                    str = QString::asprintf("%8.4f,%8.4f,%7.3f,%8.2f,%7.3f,%s,%7.3f,%7.3f,%8.2f,%8.2f"
+                        , it->value, it->piakHight, it->peakPosX, it->peakPosY
+                        , it->ratio, it->description
+                        , it->leftX, it->rightX, it->leftY, it->rightY);
                     str += "," + it->time + "," + it->date + "\n";
                     out << str;
                 }
@@ -90,6 +86,19 @@ void IntegralModel::saveToCsvFile()
             }
         }
     }
+}
+
+QModelIndex IntegralModel::findById(int id)
+{
+    if (m_Results.size() > 0) {
+        for (int i = 0; i < m_Results.size(); i++) {
+            auto res = m_Results[i];
+            if (res.id == id) {               
+                return  createIndex(i, 0);
+            }
+        }
+    }
+    return createIndex(-1, 0);
 }
 
 int IntegralModel::columnCount(const QModelIndex& /*parent*/) const
@@ -110,6 +119,26 @@ QVariant IntegralModel::data(const QModelIndex& index, int role) const
             {
                 return QString::asprintf("%8.4f", m_Results[idx].value);
             }
+            case PEAK_HEIGHT_COLUMN:
+            {
+                return QString::asprintf("%8.4f", m_Results[idx].piakHight);
+            }
+            case PEAK_POS_X_COLUMN:
+            {
+                return QString::asprintf("%7.3f", m_Results[idx].peakPosX);
+            }
+            case PEAK_POS_Y_COLUMN:
+            {
+                return QString::asprintf("%8.2f", m_Results[idx].peakPosY);
+            }
+            case RATIO_POS_COLUMN:
+            {
+                return QString::asprintf("%7.3f", m_Results[idx].ratio);
+            }
+            case DESCRIPT_COLUMN:
+            {
+                return m_Results[idx].description;
+            }
             case LEFT_X_COLUMN:
             {
                 return QString::asprintf("%7.3f", m_Results[idx].leftX);
@@ -129,12 +158,10 @@ QVariant IntegralModel::data(const QModelIndex& index, int role) const
             case TIME_COLUMN:
             {
                 return m_Results[idx].time;
-                break;
             }
             case DATE_COLUMN:
             {
                 return m_Results[idx].date;
-                break;
             }
             default:
                 return QVariant();
@@ -156,6 +183,26 @@ QVariant IntegralModel::headerData(int section, Qt::Orientation orientation, int
         case VALUE_COLUMN:
         {
             return VALUE_COLUMN_NAME;
+        }
+        case PEAK_HEIGHT_COLUMN:
+        {
+            return PEAK_HEIGHT_COLUMN_NAME;
+        }
+        case PEAK_POS_X_COLUMN:
+        {
+            return PEAK_POS_X_COLUMN_NAME;
+        }
+        case PEAK_POS_Y_COLUMN:
+        {
+            return PEAK_POS_Y_COLUMN_NAME;
+        }
+        case RATIO_POS_COLUMN:
+        {
+            return RATIO_POS_COLUMN_NAME;
+        }
+        case DESCRIPT_COLUMN:
+        {
+            return DESCRIPT_COLUMN_NAME;
         }
         case LEFT_X_COLUMN:
         {
