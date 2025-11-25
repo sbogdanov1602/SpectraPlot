@@ -74,10 +74,9 @@ void IntegralModel::saveToCsvFile()
 
                 for (auto it = m_Results.begin(); it != m_Results.end(); it++)
                 {
-                    str = QString::asprintf("%8.4f,%8.4f,%7.3f,%8.2f,%7.3f,%s,%7.3f,%7.3f,%8.2f,%8.2f"
-                        , it->value, it->piakHight, it->peakPosX, it->peakPosY
-                        , it->ratio, it->description
-                        , it->leftX, it->rightX, it->leftY, it->rightY);
+                    str = QString::asprintf("%8.4f,%8.4f,%7.3f,%8.2f,%7.3f"
+                        , it->value, it->piakHight, it->peakPosX, it->peakPosY, it->ratio) + "," + it->description;
+                    str += QString::asprintf(",%7.3f,%7.3f,%8.2f,%8.2f", it->leftX, it->rightX, it->leftY, it->rightY);
                     str += "," + it->time + "," + it->date + "\n";
                     out << str;
                 }
