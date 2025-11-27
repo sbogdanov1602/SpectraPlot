@@ -16,12 +16,16 @@ public:
 		int max_peakHeight;
 		int max_point_idx;
 		int max_spectr_idx;
+		int max_left;
+		int max_right;
 
 		void max_peac()
 		{
 			max_peakHeight = 0;;
 			max_point_idx = 0;
 			max_spectr_idx = 0;
+			max_left = 0;
+			max_right = 0;
 		}
 	};
 
@@ -49,7 +53,7 @@ protected:
 	std::vector<std::vector<double>>& m_LstSpecDataT;
 	Cursor* m_vCursor;
 	Cursor* m_hCursor;
-	void CalculateVInterval(int& leftV, int& rightV, int& avgNoise);
+	void CalculateVInterval(int point_idx, int& leftV, int& rightV, int& avgNoise);
 	max_peak CalculateHInterval(int& leftH, int& rightH, int& avgNoise);
 	void CalculateMaxPeakInterval(std::vector<TPeak>& peaks, int& left, int& right, int& max_height, int& max_height_idx);
 };
