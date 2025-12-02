@@ -94,7 +94,9 @@ C2DIntegralCalc::max_peak C2DIntegralCalc::CalculateHInterval(int& leftH, int& r
 	algParams.iNoiseRate = gSettings.GetNoiseRate();
 
 	size_t count = m_LstSpecData.at(0).size();
+
 	max_peak max_peak_data;
+
 	for (int i = m_startIdx; i < m_endIdx; i++) {
 		int* pData = new int[count];
 		for (int k = 0; k < count; k++) {

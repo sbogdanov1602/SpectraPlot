@@ -19,13 +19,13 @@ public:
 		int max_left;
 		int max_right;
 
-		void max_peac()
+		max_peak() :
+			max_peakHeight(0)
+			,max_point_idx(0)
+			,max_spectr_idx(0)
+			,max_left(0)
+			,max_right(0)
 		{
-			max_peakHeight = 0;;
-			max_point_idx = 0;
-			max_spectr_idx = 0;
-			max_left = 0;
-			max_right = 0;
 		}
 	};
 
