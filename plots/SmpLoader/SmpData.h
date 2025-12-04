@@ -16,11 +16,13 @@ public:
 protected:
 	int m_iMeaningAreaBeg;
 	int m_iMeaningAreaLength;
+	float m_fPointScale;
+	float m_fMeasurementStep;
+	double m_dSignalCoeff;
+	std::string m_sMapXAxisLabel;
+	std::string m_sMapYAxisLabel;
+	std::string m_sSignalAxisLabel;
 
 	void LoadSettings();
-/*
-	void CorrectDataToBase(std::vector<double>& data, double dBaseLine);
-	double CalculateBaseLine(std::vector<double>& data);
-*/
 };
 

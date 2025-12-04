@@ -17,6 +17,12 @@ void SmpData::LoadSettings()
         QSettings settings(settingsFile, QSettings::IniFormat);
         m_iMeaningAreaBeg = settings.value("MeaningAreaBeg").toInt();
         m_iMeaningAreaLength = settings.value("MeaningAreaLength").toInt();
+        m_fPointScale = settings.value("PointScale", 0.0f).toFloat();
+        m_fMeasurementStep = settings.value("MeasurementStep", 0.0f).toFloat();
+        m_dSignalCoeff = settings.value("SignalCoeff", 0.0f).toDouble();
+        m_sMapXAxisLabel = settings.value("MapXAxisLabel", "").toString().toStdString();
+        m_sMapYAxisLabel = settings.value("MapYAxisLabel", "").toString().toStdString();
+        m_sSignalAxisLabel = settings.value("SignalAxisLabel", "").toString().toStdString();
     }
 }
 
@@ -134,48 +140,33 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
 
     return nFiles;
 }
-/*
-double SmpData::CalculateBaseLine(std::vector<double>& data)
-{
-    double dBaseLine = IPlotData::CalculateBaseLine(data, m_iMeaningAreaBeg, m_iMeaningAreaLength);
-    return dBaseLine;
-}
 
-void SmpData::CorrectDataToBase(std::vector<double>& data, double dBaseLine)
-{
-    for (int i = data.size() - 1; i > 2; i--)
-    {
-        auto val = data[i] - dBaseLine;
-        data[i] = val >= 0.0 ? val : 0.0;
-    }
-}
-*/
 float SmpData::PointScale()
 {
-    return 24.0f;
+    return m_fPointScale;
 }
 
 float SmpData::MeasurementStep()
 {
-    return 1.0f;
+    return m_fMeasurementStep;
 }
 
 double SmpData::SignalCoeff()
 {
-    return 0.0000625;// 4.096 / 65536 ;
+    return m_dSignalCoeff;//0.0000625;// 4.096 / 65536 ;
 }
 
 std::string SmpData::MapXAxisLabel()
 {
-    return "t (ms)";
+    return m_sMapXAxisLabel;//"t (ms)";
 }
 
 std::string SmpData::MapYAxisLabel()
 {
-    return "t (sec)";
+    return m_sMapYAxisLabel;// "t (sec)";
 }
 
 std::string SmpData::SignalAxisLabel()
 {
-    return "signal (V)";
+    return m_sSignalAxisLabel;// "signal (V)";
 }
