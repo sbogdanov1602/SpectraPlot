@@ -14,12 +14,13 @@ public:
 	std::string MapYAxisLabel() override;
 	std::string SignalAxisLabel() override;
 protected:
-	double m_dBaseLine;
-	int m_iMeanValIndex;
 	int m_iMeaningAreaBeg;
 	int m_iMeaningAreaLength;
 
-	void CorrectDataToBase(std::vector<double>& data);
-	void CalculateBaseLine(std::vector<double>& data);
+	void LoadSettings();
+/*
+	void CorrectDataToBase(std::vector<double>& data, double dBaseLine);
+	double CalculateBaseLine(std::vector<double>& data);
+*/
 };
 

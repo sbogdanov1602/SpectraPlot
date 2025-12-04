@@ -13,5 +13,9 @@ public:
 	std::string MapXAxisLabel() override;
 	std::string MapYAxisLabel() override;
 	std::string SignalAxisLabel() override;
+protected:
+	int m_iMeaningAreaBeg;
+	int m_iMeaningAreaLength;
+	void LoadSettings();
 };
 

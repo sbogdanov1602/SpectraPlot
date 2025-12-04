@@ -114,6 +114,9 @@
     <ClCompile Include="CchData.cpp" />
     <ClCompile Include="CchLoader.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="cch_data.ini" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />

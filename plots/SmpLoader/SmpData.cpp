@@ -1,18 +1,29 @@
 #include "SmpData.h"
 #include <qmetatype.h>
 #include <qdir.h>
+#include <qsettings.h>
 
 SmpData::SmpData():IPlotData()
 {
-    m_dBaseLine = 0.0;
-    m_iMeanValIndex = 100;
-    m_iMeaningAreaBeg = 171;
-    m_iMeaningAreaLength = 100;
+    m_iMeaningAreaBeg = 172;
+    m_iMeaningAreaLength = 101;
+    LoadSettings();
+}
+
+void SmpData::LoadSettings()
+{
+    auto settingsFile = QDir::currentPath() + "/smp_data.ini";
+    if (QFile::exists(settingsFile)) {
+        QSettings settings(settingsFile, QSettings::IniFormat);
+        m_iMeaningAreaBeg = settings.value("MeaningAreaBeg").toInt();
+        m_iMeaningAreaLength = settings.value("MeaningAreaLength").toInt();
+    }
 }
 
 int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressDlgValue, std::function<void(int)>  setMaximum, bool loadOneFileOnly)
 {
     ClearData();
+    double dBaseLine = 0.0;
 
     QString fname(&(inFilePath[0]));
     QString dir;
@@ -87,11 +98,13 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
                 break;
 
             val *= SignalCoeff();
-            if (nFiles == 0 && i == m_iMeanValIndex) {
-                m_dBaseLine = val;
-                CorrectDataToBase(vec);
+
+            if (nFiles == 0 && vec.size() == (m_iMeaningAreaBeg + m_iMeaningAreaLength + 1)) {
+                dBaseLine = CalculateBaseLine(vec, m_iMeaningAreaBeg, m_iMeaningAreaLength);
+                CorrectDataToBase(vec, dBaseLine);
             }
-            val -= m_dBaseLine;
+            
+            val -= dBaseLine;
             if (val < 0.0) {
                 val = 0.0;
             }
@@ -121,34 +134,22 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
 
     return nFiles;
 }
-
-void SmpData::CalculateBaseLine(std::vector<double>& data)
-{
-    int m_dBaseLine = 0.0;
 /*
-    for (int i = m_iMeaningAreaBeg; (i < m_iMeaningAreaBeg + m_iMeaningAreaLength) && i < data.size(); i++)
-    {
-        if (i != m_iMeaningAreaBeg)
-        {
-            int n = i - m_iMeaningAreaBeg;
-            m_dBaseLine = (m_dBaseLine * n + data[i]) / (n + 1);
-        }
-        else
-        {
-            m_dBaseLine = data[i];
-        }
-    }
-*/
-}
-
-void SmpData::CorrectDataToBase(std::vector<double>& data)
+double SmpData::CalculateBaseLine(std::vector<double>& data)
 {
-    for (int i = data.size() - 1; i >= 2; i--)
-    {
-        data[i] = data[i] - m_dBaseLine;
-    }
+    double dBaseLine = IPlotData::CalculateBaseLine(data, m_iMeaningAreaBeg, m_iMeaningAreaLength);
+    return dBaseLine;
 }
 
+void SmpData::CorrectDataToBase(std::vector<double>& data, double dBaseLine)
+{
+    for (int i = data.size() - 1; i > 2; i--)
+    {
+        auto val = data[i] - dBaseLine;
+        data[i] = val >= 0.0 ? val : 0.0;
+    }
+}
+*/
 float SmpData::PointScale()
 {
     return 24.0f;
