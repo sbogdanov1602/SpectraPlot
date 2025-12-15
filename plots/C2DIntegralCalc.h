@@ -49,12 +49,16 @@ protected:
 	int m_leftY;
 	int m_rightY;
 
+	int m_maxIterationNum;
+	double m_changeCoeff;
+
 	std::vector<std::vector<double>>& m_LstSpecData;
 	std::vector<std::vector<double>>& m_LstSpecDataT;
 	Cursor* m_vCursor;
 	Cursor* m_hCursor;
 	void CalculateVInterval(int point_idx, int& leftV, int& rightV, int& avgNoise);
-	max_peak CalculateHInterval(int& leftH, int& rightH, int& avgNoise);
+	max_peak CalculateHInterval(bool& peaksCount, int& avgNoise);
 	void CalculateMaxPeakInterval(std::vector<TPeak>& peaks, int& left, int& right, int& max_height, int& max_height_idx);
+	void PrepareIntervals(int iterationNum, double stepH, double stepV);
 };
 

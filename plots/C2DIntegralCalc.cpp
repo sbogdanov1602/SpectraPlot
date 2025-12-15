@@ -18,72 +18,92 @@ C2DIntegralCalc::C2DIntegralCalc(QCPItemLine& vLine, QCPItemLine& hLine
 	, m_endIdx(0)
 	, m_vCursor(vCursor)
 	, m_hCursor(hCursor)
+	, m_maxIterationNum(gSettings.GetMaxIterationNum())
+	, m_changeCoeff(gSettings.GetChangeCoeff())
+
 {
 }
 
-Result C2DIntegralCalc::Calculate()
+void C2DIntegralCalc::PrepareIntervals(int iterationNum, double stepH, double stepV)
 {
 	QCPItemPosition* end = m_vLine.end;
 	QCPItemPosition* start = m_vLine.start;
 	double start_val = start->value();
 	double end_val = end->value();
-	double stepV = gSettings.GetMeasurementStep();
-	m_leftY = m_startIdx = (int)(start_val / stepV);
-	m_rightY = m_endIdx = (int)(end_val / stepV);
 
 	QCPItemPosition* endx = m_hLine.end;
 	QCPItemPosition* startx = m_hLine.start;
 	double startx_key = startx->key();
 	double endx_key = endx->key();
-	double stepH = gSettings.GetPointScale() / gSettings.GetPointsNum();
+
+	if (iterationNum > 0) {
+		double dh = (endx_key - startx_key) * iterationNum * m_changeCoeff;
+		startx_key -= dh;
+		if (startx_key < 0.0) {
+			startx_key = 0.0;
+		}
+		endx_key += dh;
+	}
+
 	m_leftX = m_startx_idx = (int)(startx_key / stepH);
 	m_rightX = m_endx_idx = (int)(endx_key / stepH);
+	m_leftY = m_startIdx = (int)(start_val / stepV);
+	m_rightY = m_endIdx = (int)(end_val / stepV);
+}
 
-	size_t spCount = m_LstSpecDataT.at(0).size();	
-
-//	CalculateVInterval(leftV, rightV, avgNoiseV);
-
-	size_t count = m_LstSpecData.at(0).size();
-	int leftH = count, rightH = 0, avgNoiseH = 0; 
-	auto max_peak = CalculateHInterval(leftH, rightH, avgNoiseH);
-
-	int leftV = m_leftY, rightV = m_rightY, avgNoiseV = 0;
-	CalculateVInterval(max_peak.max_point_idx, leftV, rightV, avgNoiseV);
-
-	double avgNoise = (avgNoiseH + avgNoiseV) * 0.5 * gSettings.GetSignalCoeff();
-
-	leftH = max_peak.max_left;
-	rightH = max_peak.max_right;
-
-	double beg_h = leftH * stepH;
-	double end_h = rightH * stepH;
-	double beg_v = leftV * stepV;
-	double end_v = rightV * stepV;
-
-	double result = 0.0;
-	for (int i = leftV; i <= rightV; i++) {
-		for (int j = leftH; j < rightH; j++) {
-			double addVal = (m_LstSpecData[i][j] + m_LstSpecData[i + 1][j] + m_LstSpecData[i][j + 1] + m_LstSpecData[i + 1][j + 1] - 4.0 * avgNoise) / 4.0 * stepH * stepV;
-			// - 4.0 * avgNoise        - the noise part of integral
-			result += addVal > 0.0 ? addVal : 0.0;
-		}
-	}
+Result C2DIntegralCalc::Calculate()
+{
 	Result ret;
-	ret.piakHight = max_peak.max_peakHeight * gSettings.GetSignalCoeff();
-	ret.peakPosX = max_peak.max_point_idx * stepH;
-	ret.peakPosY = max_peak.max_spectr_idx * stepV;
-	ret.value = result;
-	ret.leftX = beg_h;
-	ret.rightX = end_h;
-	ret.leftY = beg_v;
-	ret.rightY = end_v;
+	double stepV = gSettings.GetMeasurementStep();
+	double stepH = gSettings.GetPointScale() / gSettings.GetPointsNum();
+
+	int iteration = 0;
+	bool peaksExist = false;
+	
+	while (!peaksExist && (iteration <= m_maxIterationNum)) {
+		PrepareIntervals(iteration, stepH, stepV);
+		int avgNoiseH = 0;
+		auto max_peak = CalculateHInterval(peaksExist, avgNoiseH);
+		if (peaksExist) {
+			int leftV = m_leftY, rightV = m_rightY, avgNoiseV = 0;
+			CalculateVInterval(max_peak.max_point_idx, leftV, rightV, avgNoiseV);
+
+			double avgNoise = (avgNoiseH + avgNoiseV) * 0.5 * gSettings.GetSignalCoeff();
+
+			int leftH = max_peak.max_left;
+			int rightH = max_peak.max_right;
+
+			double beg_h = leftH * stepH;
+			double end_h = rightH * stepH;
+			double beg_v = leftV * stepV;
+			double end_v = rightV * stepV;
+
+			double result = 0.0;
+			for (int i = leftV; i <= rightV; i++) {
+				for (int j = leftH; j < rightH; j++) {
+					double addVal = (m_LstSpecData[i][j] + m_LstSpecData[i + 1][j] + m_LstSpecData[i][j + 1] + m_LstSpecData[i + 1][j + 1] - 4.0 * avgNoise) / 4.0 * stepH * stepV;
+					// - 4.0 * avgNoise        - the noise part of integral
+					result += addVal > 0.0 ? addVal : 0.0;
+				}
+			}
+			ret.piakHight = max_peak.max_peakHeight * gSettings.GetSignalCoeff();
+			ret.peakPosX = max_peak.max_point_idx * stepH;
+			ret.peakPosY = max_peak.max_spectr_idx * stepV;
+			ret.value = result;
+			ret.leftX = beg_h;
+			ret.rightX = end_h;
+			ret.leftY = beg_v;
+			ret.rightY = end_v;
+		}
+		iteration++;
+	}
 	ret.time = QTime::currentTime().toString();
 	ret.date = QDate::currentDate().toString();
 	ret.description = VALUE_COLUMN_NAME;
 	return ret;
 }
 
-C2DIntegralCalc::max_peak C2DIntegralCalc::CalculateHInterval(int& leftH, int& rightH, int& avgNoise)
+C2DIntegralCalc::max_peak C2DIntegralCalc::CalculateHInterval(bool& peaksExist, int& avgNoise)
 {
 	auto algParams = TPDAlgParams();
 	algParams.bAutoNoise = true;
@@ -96,7 +116,7 @@ C2DIntegralCalc::max_peak C2DIntegralCalc::CalculateHInterval(int& leftH, int& r
 	size_t count = m_LstSpecData.at(0).size();
 
 	max_peak max_peak_data;
-
+	peaksExist = false;
 	for (int i = m_startIdx; i < m_endIdx; i++) {
 		int* pData = new int[count];
 		for (int k = 0; k < count; k++) {
@@ -104,17 +124,21 @@ C2DIntegralCalc::max_peak C2DIntegralCalc::CalculateHInterval(int& leftH, int& r
 		}
 		auto vecPeaks = PDAlg::PeaksDetecting(pData, count, 1.0, &algParams);
 		delete pData;
-		avgNoise = algParams.iNoiseLevel / gSettings.GetNoiseRate();
-		int max_height = 0, max_height_idx = 0;
-		int _leftH = 0, _rightH = 0;
-		CalculateMaxPeakInterval(vecPeaks, _leftH, _rightH, max_height, max_height_idx);
-		if (max_height > max_peak_data.max_peakHeight) {
-			max_peak_data.max_peakHeight = max_height;
-			max_peak_data.max_point_idx = max_height_idx;
-			max_peak_data.max_spectr_idx = i;
-			max_peak_data.max_left = _leftH;
-			max_peak_data.max_right = _rightH;
+		bool b = (vecPeaks.size() > 0);
+		if (b) {
+			avgNoise = algParams.iNoiseLevel / gSettings.GetNoiseRate();
+			int max_height = 0, max_height_idx = 0;
+			int _leftH = 0, _rightH = 0;
+			CalculateMaxPeakInterval(vecPeaks, _leftH, _rightH, max_height, max_height_idx);
+			if (max_height > max_peak_data.max_peakHeight) {
+				max_peak_data.max_peakHeight = max_height;
+				max_peak_data.max_point_idx = max_height_idx;
+				max_peak_data.max_spectr_idx = i;
+				max_peak_data.max_left = _leftH;
+				max_peak_data.max_right = _rightH;
+			}
 		}
+		peaksExist = peaksExist || b;
 	}
 	return max_peak_data;
 }
@@ -162,84 +186,3 @@ void C2DIntegralCalc::CalculateVInterval(int point_idx, int& leftV, int& rightV,
 	int max_height = 0, max_height_idx = 0;
 	CalculateMaxPeakInterval(vecPeaks, leftV, rightV, max_height, max_height_idx);
 }
-/*
-void C2DIntegralCalc::CalculateVInterval_Old(int& leftV, int& rightV, int& avgNoise)
-{
-	auto algParams = TPDAlgParams();
-	algParams.bAutoNoise = true;
-	algParams.bAllData = false;
-	algParams.iLeftLim = m_leftY;
-	algParams.iRightLim = m_rightY;
-	//algParams.iMaxPeakCount = 1;
-	algParams.iNoiseRate = gSettings.GetNoiseRate();
-
-	size_t spCount = m_LstSpecDataT.at(0).size();
-
-	for (int i = m_startx_idx; i < m_endx_idx; i++) {
-		int* pData = new int[spCount];
-		for (int j = 0; j < spCount; j++) {
-			pData[j] = (int)(m_LstSpecDataT[i][j] / gSettings.GetSignalCoeff());
-		}
-		auto vecPeaks = PDAlg::PeaksDetecting(pData, spCount, 1.0, &algParams);
-		delete pData;
-		avgNoise = algParams.iNoiseLevel / gSettings.GetNoiseRate();
-		int max_height = 0, max_height_idx = 0;
-		CalculateMaxPeakInterval(vecPeaks, leftV, rightV, max_height, max_height_idx);
-	}
-}
-
-Result C2DIntegralCalc::Calculate_Old()
-{
-	QCPItemPosition* end = m_vLine.end;
-	QCPItemPosition* start = m_vLine.start;
-	double start_val = start->value();
-	double end_val = end->value();
-	double stepV = gSettings.GetMeasurementStep();
-	m_leftY = m_startIdx = (int)(start_val / stepV);
-	m_rightY = m_endIdx = (int)(end_val / stepV);
-	QCPItemPosition* endx = m_hLine.end;
-	QCPItemPosition* startx = m_hLine.start;
-	double startx_key = startx->key();
-	double endx_key = endx->key();
-	double stepH = gSettings.GetPointScale() / gSettings.GetPointsNum();
-	m_leftX = m_startx_idx = (int)(startx_key / stepH);
-	m_rightX = m_endx_idx = (int)(endx_key / stepH);
-	size_t spCount = m_LstSpecDataT.at(0).size();
-	int leftV = spCount, rightV = m_rightY, avgNoiseV = 0;
-	//sb dbg CalculateVInterval(leftV, rightV, avgNoiseV);
-
-	size_t count = m_LstSpecData.at(0).size();
-	int leftH = count, rightH = 0, avgNoiseH = 0;
-	auto max_peak = CalculateHInterval(leftH, rightH, avgNoiseH);
-
-	double avgNoise = (avgNoiseH + avgNoiseV) * 0.5 * gSettings.GetSignalCoeff();
-
-	double beg_h = leftH * stepH;
-	double end_h = rightH * stepH;
-	double beg_v = leftV * stepV;
-	double end_v = rightV * stepV;
-
-	double result = 0.0;
-	for (int i = leftV; i <= rightV; i++) {
-		for (int j = leftH; j < rightH; j++) {
-			double addVal = (m_LstSpecData[i][j] + m_LstSpecData[i + 1][j] + m_LstSpecData[i][j + 1] + m_LstSpecData[i + 1][j + 1] - 4.0 * avgNoise) / 4.0 * stepH * stepV;
-			// - 4.0 * avgNoise        - the noise part of integral
-			result += addVal > 0.0 ? addVal : 0.0;
-		}
-	}
-	Result ret;
-	ret.piakHight = max_peak.max_peakHeight * gSettings.GetSignalCoeff();
-	ret.peakPosX = max_peak.max_point_idx * stepH;
-	ret.peakPosY = max_peak.max_spectr_idx * stepV;
-	ret.value = result;
-	ret.leftX = beg_h;
-	ret.rightX = end_h;
-	ret.leftY = beg_v;
-	ret.rightY = end_v;
-	ret.time = QTime::currentTime().toString();
-	ret.date = QDate::currentDate().toString();
-	ret.description = VALUE_COLUMN_NAME;
-	return ret;
-}
-*/
-

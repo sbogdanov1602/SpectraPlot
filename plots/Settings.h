@@ -22,6 +22,12 @@ public:
 	int GetNoiseRate() { return m_NoiseRate; }
 	void SetNoiseRate(int value) { m_NoiseRate = value; }
 
+	int GetMaxIterationNum() { return m_MaxIterationNum; }
+	void SetMaxIterationNum(int value) { m_MaxIterationNum = value; }
+
+	double GetChangeCoeff() { return m_ChangeCoeff; }
+	void SetChangeCoeff(double value) { m_ChangeCoeff = value; }
+
 	void Load();
 protected:
 	float m_PointScale; //ms
@@ -29,6 +35,9 @@ protected:
 	double m_SignalCoeff; // to V
 	int    m_PointsNum;
 	int m_NoiseRate;
+	int m_MaxIterationNum;
+	double m_ChangeCoeff;
+
 private:
 	QString m_FileName;
 };
