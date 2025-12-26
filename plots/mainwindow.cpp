@@ -58,6 +58,7 @@
 //#include "SmpLoader/SmpLoader.h"
 //#include "CchLoader/CchLoader.h"
 #include "Libraries.h"
+#include "CPlotData.h"
 
 Ui_MainWindow;
 
@@ -69,7 +70,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
   gGlobalId = 0;
 
-  m_pPlotData = nullptr;
   m_pProgressDlg = nullptr;
   m_dir = QApplication::applicationDirPath();
   /*
@@ -203,11 +203,11 @@ void MainWindow::plotOneGraph(QCustomPlot* customPlot, std::vector<double> in)
     }
     customPlot->graph(0)->setData(x, y);
     // give the axes some labels:
-    customPlot->xAxis->setLabel(QString(&(m_pPlotData->MapXAxisLabel()[0]))/*"t (ms)"*/);
-    customPlot->yAxis->setLabel(QString(&(m_pPlotData->SignalAxisLabel()[0]))/*"signal (V)"*/);
+    customPlot->xAxis->setLabel(QString(&(gPlotData.GetPlotData()->MapXAxisLabel()[0]))/*"t (ms)"*/);
+    customPlot->yAxis->setLabel(QString(&(gPlotData.GetPlotData()->SignalAxisLabel()[0]))/*"signal (V)"*/);
     // set axes ranges, so we see all data:
-    customPlot->xAxis->setRange(0, m_pointStep * (m_pPlotData->PointsNum() - 1));
-    customPlot->yAxis->setRange(0, m_pPlotData->GetMaxSignal());
+    customPlot->xAxis->setRange(0, m_pointStep * (gPlotData.GetPlotData()->PointsNum() - 1));
+    customPlot->yAxis->setRange(0, gPlotData.GetPlotData()->GetMaxSignal());
     //customPlot->graph(0)->data()->keyRange(QCPRange(0, 24.0));
     customPlot->axisRect()->setupFullAxesBox(true);
     customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);// | QCP::iSelectPlottables);
@@ -225,7 +225,7 @@ void MainWindow::plotTwoGraph(QCustomPlot* customPlot, std::vector<double> in)
     double max = 0.0;
     for (int i = 0; i < size; ++i)
     {
-        x.push_back(i * m_pPlotData->MeasurementStep()/*m_measurementStep*/);
+        x.push_back(i * gPlotData.GetPlotData()->MeasurementStep()/*m_measurementStep*/);
         v = in[i];  // let's plot a quadratic function
         if (v > max) {
             max = v;
@@ -243,11 +243,11 @@ void MainWindow::plotTwoGraph(QCustomPlot* customPlot, std::vector<double> in)
 
     customPlot->graph(0)->setData(x, y);
     // give the axes some labels:
-    customPlot->yAxis->setLabel(QString(&(m_pPlotData->MapYAxisLabel()[0]))/*"t (sec)"*/);
-    customPlot->xAxis->setLabel(QString(&(m_pPlotData->SignalAxisLabel()[0]))/*"signal (V)"*/);
+    customPlot->yAxis->setLabel(QString(&(gPlotData.GetPlotData()->MapYAxisLabel()[0]))/*"t (sec)"*/);
+    customPlot->xAxis->setLabel(QString(&(gPlotData.GetPlotData()->SignalAxisLabel()[0]))/*"signal (V)"*/);
     // set axes ranges, so we see all data:
-    customPlot->yAxis->setRange(0, (m_pPlotData->SpectraNum() - 1) * m_pPlotData->MeasurementStep());
-    customPlot->xAxis->setRange(0, m_pPlotData->GetMaxSignal());
+    customPlot->yAxis->setRange(0, (gPlotData.GetPlotData()->SpectraNum() - 1) * gPlotData.GetPlotData()->MeasurementStep());
+    customPlot->xAxis->setRange(0, gPlotData.GetPlotData()->GetMaxSignal());
     //customPlot->graph(0)->data()->keyRange(QCPRange(0, 24.0));
     customPlot->axisRect()->setupFullAxesBox(true);
     customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);// | QCP::iSelectPlottables);
@@ -284,12 +284,12 @@ void MainWindow::onPlotClick(QCPAbstractPlottable* plottable, int dataIndex, QMo
     bool b1;
     auto valueRange = plottable->getValueRange(b1);
 
-    m_spectrumIdx = (int)(value / m_pPlotData->MeasurementStep());
-    plotOneGraph(ui->customPlot2, m_pPlotData->LstSpecData()[m_spectrumIdx]);
+    m_spectrumIdx = (int)(value / gPlotData.GetPlotData()->MeasurementStep());
+    plotOneGraph(ui->customPlot2, gPlotData.GetPlotData()->LstSpecData()[m_spectrumIdx]);
     m_pointIdx = (int)(key / m_pointStep);
     plotTwoGraph(ui->customPlotH, LstSpecDataT()[m_pointIdx]);
 
-    auto signalValue = m_pPlotData->LstSpecData()[m_spectrumIdx].at(m_pointIdx);
+    auto signalValue = gPlotData.GetPlotData()->LstSpecData()[m_spectrumIdx].at(m_pointIdx);
 
     m_HeatMapHCursor.CreateHCursor(ui->customPlot, QPointF(keyRange.lower, value), QPointF(keyRange.upper, value), QPointF(value, signalValue));
     m_HeatMapVCursor.CreateVCursor(ui->customPlot, QPointF(key, valueRange.lower), QPointF(key, valueRange.upper), QPointF(key, signalValue), &m_BaseCursor);
@@ -303,7 +303,7 @@ void MainWindow::onPlotClick(QCPAbstractPlottable* plottable, int dataIndex, QMo
     
     if (m_BaseCursor.Exists()) {
         m_BaseCursor.ClearCursor();
-        m_BaseCursor.Create(ui->customPlot2, &m_HSelect.ItemLine(), &m_pPlotData->LstSpecData(), m_spectrumIdx);
+        m_BaseCursor.Create(ui->customPlot2, &m_HSelect.ItemLine(), &gPlotData.GetPlotData()->LstSpecData(), m_spectrumIdx);
     }
 
     ui->customPlotH->replot();
@@ -381,13 +381,15 @@ void MainWindow::onOpenAction()
 
             m_fileList = directory.entryList(QStringList() << "*." + ext << "*." + ext.toUpper(), QDir::Files);
 
-            if (m_pPlotData != nullptr)
+            if (gPlotData.GetPlotData() != nullptr)
             {
-                //delete m_pPlotData;
-                m_pPlotData = nullptr;
+                gPlotData.SetPlotData(nullptr);
             }
             bool loadOneFileOnly = false;
-            
+
+            if (m_BaseCursor.Exists()) {
+                onRemoveBaseCursor();
+            }
             clearPlots();
 
             ext = ext.toLower();
@@ -403,9 +405,9 @@ void MainWindow::onOpenAction()
 
                 MYFUNCTION pFunction = (MYFUNCTION)GetProcAddress(dllItem->hmodule, pStr);
                 if (pFunction) {
-                    m_pPlotData = pFunction();
+                    gPlotData.SetPlotData(pFunction());
                     loadOneFileOnly = dllItem->loadOneFileOnly;
-                    if (m_pPlotData) {
+                    if (gPlotData.GetPlotData()) {
 
                         if (m_pProgressDlg != nullptr) {
                             delete m_pProgressDlg;
@@ -421,7 +423,7 @@ void MainWindow::onOpenAction()
                         auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
                         auto ptrToSetMaximum = std::bind(&QProgressDialog::setMaximum, m_pProgressDlg, std::placeholders::_1);
 
-                        retNFiles = m_pPlotData->Load(fname.toStdString(), ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
+                        retNFiles = gPlotData.GetPlotData()->Load(fname.toStdString(), ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
                         makeSpecDataT();
 
                         QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
@@ -432,7 +434,7 @@ void MainWindow::onOpenAction()
                         QMessageBox::information(
                             this,
                             "Files are loaded",
-                            QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(m_pPlotData->SpectraNum()),
+                            QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(gPlotData.GetPlotData()->SpectraNum()),
                             QMessageBox::StandardButton::Ok);
 
                         setupColorDataMap(ui->customPlot);
@@ -457,7 +459,7 @@ void MainWindow::onOpenAction()
     }
 }
 
-void MainWindow::ClearCursors()
+void MainWindow::clearCursors()
 {
     m_HPlotCursor.ClearCursor();
     m_VPlotCursor.ClearCursor();
@@ -467,14 +469,14 @@ void MainWindow::ClearCursors()
 
 void MainWindow::onResetAction()
 {
-    if (m_pPlotData != nullptr && m_pPlotData->LstSpecData().size() > 0)
+    if (gPlotData.GetPlotData() != nullptr && gPlotData.GetPlotData()->LstSpecData().size() > 0)
     {        
         ClearLines();
         ClearResults();
-        ClearCursors();
+        clearCursors();
 
         ui->customPlot->rescaleAxes();
-        plotOneGraph(ui->customPlot2, m_pPlotData->LstSpecData().at(0));
+        plotOneGraph(ui->customPlot2, gPlotData.GetPlotData()->LstSpecData().at(0));
         plotTwoGraph(ui->customPlotH, LstSpecDataT().at(0));
         
         ui->customPlotH->replot();
@@ -504,33 +506,36 @@ void MainWindow::clearPlots()
 void MainWindow::setupColorDataMap(QCustomPlot* customPlot)
 {
     demoName = "Color Data Map";
-    if(m_pPlotData != nullptr && m_pPlotData->LstSpecData().size() > 0)
+    if(gPlotData.GetPlotData() != nullptr && gPlotData.GetPlotData()->LstSpecData().size() > 0)
     {
+        m_spectrumIdx = 0;
+        m_pointIdx = 0;
+
         ClearLines();
         ClearResults();
-        ClearCursors();
+        clearCursors();
         clearPlots();
         // configure axis rect:
         customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
         customPlot->axisRect()->setupFullAxesBox(true);
-        customPlot->xAxis->setLabel(QString(&(m_pPlotData->MapXAxisLabel()[0])));
-        customPlot->yAxis->setLabel(QString(&(m_pPlotData->MapYAxisLabel()[0])));
+        customPlot->xAxis->setLabel(QString(&(gPlotData.GetPlotData()->MapXAxisLabel()[0])));
+        customPlot->yAxis->setLabel(QString(&(gPlotData.GetPlotData()->MapYAxisLabel()[0])));
 
         // set up the QCPColorMap:
         m_colorMap = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
-        int nx = m_pPlotData->LstSpecData().at(0).size();
-        int ny = m_pPlotData->LstSpecData().size();
+        int nx = gPlotData.GetPlotData()->LstSpecData().at(0).size();
+        int ny = gPlotData.GetPlotData()->LstSpecData().size();
         m_colorMap->data()->setSize(nx, ny); // we want the color map to have nx * ny data points
-        double xMax = gSettings.GetPointScale();
+        double xMax = gPlotData.GetPlotData()->PointScale();// gSettings.GetPointScale();
         m_pointStep = xMax / (nx - 1);
         //m_measurementStep = gSettings.GetMeasurementStep();
-        double yMax = (ny - 1) * m_pPlotData->MeasurementStep();
+        double yMax = (ny - 1) * gPlotData.GetPlotData()->MeasurementStep();
         m_colorMap->data()->setRange(QCPRange(0, xMax), QCPRange(0, yMax)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions
         // now we assign some data, by accessing the QCPColorMapData instance of the color map:
         double x, y, z;
         for (int yIndex = 0; yIndex < ny; ++yIndex)
         {
-            auto v = m_pPlotData->LstSpecData().at(yIndex);
+            auto v = gPlotData.GetPlotData()->LstSpecData().at(yIndex);
             for (int xIndex = 0; xIndex < nx; ++xIndex)
             {
                 m_colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
@@ -563,7 +568,7 @@ void MainWindow::setupColorDataMap(QCustomPlot* customPlot)
 
         // rescale the key (x) and value (y) axes so the whole color map is visible:
         customPlot->rescaleAxes();
-        plotOneGraph(ui->customPlot2, m_pPlotData->LstSpecData().at(0));
+        plotOneGraph(ui->customPlot2, gPlotData.GetPlotData()->LstSpecData().at(0));
         plotTwoGraph(ui->customPlotH, LstSpecDataT().at(0));
         ui->customPlotH->replot();
         ui->customPlot2->replot();
@@ -599,9 +604,8 @@ MainWindow::~MainWindow()
     storeWidgetsGeometry();
 
     delete m_pSettings;
-    if (m_pPlotData != nullptr) {
-        //delete m_pPlotData;
-        m_pPlotData = nullptr;
+    if (gPlotData.GetPlotData() != nullptr) {
+        gPlotData.SetPlotData(nullptr);
     }
     delete ui;
 }
@@ -632,7 +636,7 @@ void MainWindow::selectionChanged()
             m_HSelect.ClearLine();
             ClearResults();
 
-            auto val = m_spectrumIdx * m_pPlotData->MeasurementStep();//m_measurementStep;
+            auto val = m_spectrumIdx * gPlotData.GetPlotData()->MeasurementStep();//m_measurementStep;
             if (m_VSelectMap.Exists()) {
                 auto start = m_VSelectMap.ItemLine().start;
                 auto end = m_VSelectMap.ItemLine().end;
@@ -774,7 +778,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event) {
 void MainWindow::onCalculateIntegralAction()
 {
     if (m_HSelect.Exists()) {
-        CIntegralCalc integralCalc(m_HSelect.ItemLine(), m_pPlotData->LstSpecData()[m_spectrumIdx]);
+        CIntegralCalc integralCalc(m_HSelect.ItemLine(), gPlotData.GetPlotData()->LstSpecData()[m_spectrumIdx]);
         m_integral.value = integralCalc.Calculate();
         m_integral.actual = true;
         //m_LabelResults.FillLabelResults(ui->customPlotH_2, &m_integral, &m_2Dintegral);
@@ -788,7 +792,7 @@ void MainWindow::onCalculateIntegralAction()
 void MainWindow::onCalculateSummAction()
 {
     if (m_HSelectMap.Exists() && m_VSelectMap.Exists() && m_VSelectMap2.Exists()) {
-        C2DIntegralCalc integral2DCalc(m_VSelect.ItemLine(), m_HSelect.ItemLine(), m_pPlotData->LstSpecData(), LstSpecDataT(), &m_VPlotCursor, &m_HPlotCursor);
+        C2DIntegralCalc integral2DCalc(m_VSelect.ItemLine(), m_HSelect.ItemLine(), gPlotData.GetPlotData()->LstSpecData(), LstSpecDataT(), &m_VPlotCursor, &m_HPlotCursor);
         auto ret = integral2DCalc.Calculate();
         if (m_BaseCursor.Exists()) {
             ret.ratio = ret.peakPosX / m_BaseCursor.GetPosition();
@@ -840,8 +844,8 @@ void MainWindow::closeProgressDlg()
 
 void MainWindow::progressDlgWasCanceled()
 {
-    if (m_pPlotData != nullptr) {
-        m_pPlotData->CancelLoad();
+    if (gPlotData.GetPlotData() != nullptr) {
+        gPlotData.GetPlotData()->CancelLoad();
     }
     if (m_pProgressDlg != nullptr) {
     }
@@ -849,15 +853,15 @@ void MainWindow::progressDlgWasCanceled()
 
 void MainWindow::makeSpecDataT()
 {
-    if (m_pPlotData != nullptr) {
+    if (gPlotData.GetPlotData() != nullptr) {
         clearSpecDataT();
-        size_t nSpecs = m_pPlotData->LstSpecData().size();
+        size_t nSpecs = gPlotData.GetPlotData()->LstSpecData().size();
         if (nSpecs > 0) {
-            size_t size = m_pPlotData->LstSpecData().at(0).size();
+            size_t size = gPlotData.GetPlotData()->LstSpecData().at(0).size();
             m_lstSpecDataT.resize(size);
             for (int i = 0; i < nSpecs; i++) {
                 for (int j = 0; j < size; j++) {
-                    auto v = m_pPlotData->LstSpecData()[i][j];
+                    auto v = gPlotData.GetPlotData()->LstSpecData()[i][j];
                     m_lstSpecDataT[j].push_back(v);
                 }
             }
@@ -877,7 +881,7 @@ void MainWindow::clearSpecDataT()
 void MainWindow::onSetBaseCursor()
 {
     if (m_HSelect.Exists()) {
-        Result ret = m_BaseCursor.Create(ui->customPlot2, &m_HSelect.ItemLine(), &m_pPlotData->LstSpecData(), m_spectrumIdx);
+        Result ret = m_BaseCursor.Create(ui->customPlot2, &m_HSelect.ItemLine(), &gPlotData.GetPlotData()->LstSpecData(), m_spectrumIdx);
         m_pIntegralModel->addNewData(ret);
         ui->customPlot2->replot();
         updateSetBaseCursorAction(false);

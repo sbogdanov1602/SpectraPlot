@@ -1,5 +1,6 @@
 #include "C2DIntegralCalc.h"
 #include "qcustomplot.h"
+#include "CPlotData.h"
 #include "Settings.h"
 #include "pd_alg/pd_alg.h"
 
@@ -54,8 +55,8 @@ void C2DIntegralCalc::PrepareIntervals(int iterationNum, double stepH, double st
 Result C2DIntegralCalc::Calculate()
 {
 	Result ret;
-	double stepV = gSettings.GetMeasurementStep();
-	double stepH = gSettings.GetPointScale() / gSettings.GetPointsNum();
+	double stepV = gPlotData.GetPlotData()->MeasurementStep();
+	double stepH = gPlotData.GetPlotData()->PointScale() / gPlotData.GetPlotData()->PointsNum();
 
 	int iteration = 0;
 	bool peaksExist = false;
@@ -68,7 +69,7 @@ Result C2DIntegralCalc::Calculate()
 			int leftV = m_leftY, rightV = m_rightY, avgNoiseV = 0;
 			CalculateVInterval(max_peak.max_point_idx, leftV, rightV, avgNoiseV);
 
-			double avgNoise = (avgNoiseH + avgNoiseV) * 0.5 * gSettings.GetSignalCoeff();
+			double avgNoise = (avgNoiseH + avgNoiseV) * 0.5 * gPlotData.GetPlotData()->SignalCoeff();
 
 			int leftH = max_peak.max_left;
 			int rightH = max_peak.max_right;
@@ -86,7 +87,7 @@ Result C2DIntegralCalc::Calculate()
 					result += addVal > 0.0 ? addVal : 0.0;
 				}
 			}
-			ret.piakHight = max_peak.max_peakHeight * gSettings.GetSignalCoeff();
+			ret.piakHight = max_peak.max_peakHeight * gPlotData.GetPlotData()->SignalCoeff();
 			ret.peakPosX = max_peak.max_point_idx * stepH;
 			ret.peakPosY = max_peak.max_spectr_idx * stepV;
 			ret.value = result;
@@ -120,7 +121,7 @@ C2DIntegralCalc::max_peak C2DIntegralCalc::CalculateHInterval(bool& peaksExist, 
 	for (int i = m_startIdx; i < m_endIdx; i++) {
 		int* pData = new int[count];
 		for (int k = 0; k < count; k++) {
-			pData[k] = (int)(m_LstSpecData[i][k] / gSettings.GetSignalCoeff());
+			pData[k] = (int)(m_LstSpecData[i][k] / gPlotData.GetPlotData()->SignalCoeff());
 		}
 		auto vecPeaks = PDAlg::PeaksDetecting(pData, count, 1.0, &algParams);
 		delete pData;
@@ -178,7 +179,7 @@ void C2DIntegralCalc::CalculateVInterval(int point_idx, int& leftV, int& rightV,
 
 	int* pData = new int[spCount];
 	for (int j = 0; j < spCount; j++) {
-		pData[j] = (int)(m_LstSpecDataT[point_idx][j] / gSettings.GetSignalCoeff());
+		pData[j] = (int)(m_LstSpecDataT[point_idx][j] / gPlotData.GetPlotData()->SignalCoeff());
 	}
 	auto vecPeaks = PDAlg::PeaksDetecting(pData, spCount, 1.0, &algParams);
 	delete pData;

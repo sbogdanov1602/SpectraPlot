@@ -196,6 +196,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="C2DIntegralCalc.cpp" />
+    <ClCompile Include="CPlotData.cpp" />
     <ClCompile Include="Cursor.cpp" />
     <ClCompile Include="IntegralCalc.cpp" />
     <ClCompile Include="IntegralModel.cpp" />
@@ -240,6 +241,7 @@
   <ItemGroup>
     <ClInclude Include="C2DIntegralCalc.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="CPlotData.h" />
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="IntegralCalc.h" />
     <QtMoc Include="IntegralModel.h" />

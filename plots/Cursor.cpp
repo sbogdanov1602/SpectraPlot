@@ -1,5 +1,6 @@
 #include "Cursor.h"
 #include <Settings.h>
+#include <CPlotData.h>
 #include "pd_alg/pd_alg.h"
 #include <Common.h>
 
@@ -116,7 +117,7 @@ Result  BaseCursor::Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<st
         m_dStartx_key = startx->key();
         m_dEndx_key = endx->key();
     }
-    double stepH = gSettings.GetPointScale() / gSettings.GetPointsNum();
+    double stepH = gPlotData.GetPlotData()->PointScale() / gPlotData.GetPlotData()->PointsNum();
     int leftX  = (int)(m_dStartx_key / stepH);
     int rightX = (int)(m_dEndx_key / stepH);
 
@@ -132,7 +133,7 @@ Result  BaseCursor::Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<st
 
     int* pData = new int[count];
     for (int k = 0; k < count; k++) {
-        pData[k] = (int)((*lstSpecData)[iSpecIndx][k] / gSettings.GetSignalCoeff());
+        pData[k] = (int)((*lstSpecData)[iSpecIndx][k] / gPlotData.GetPlotData()->SignalCoeff());
     }
     auto vecPeaks = PDAlg::PeaksDetecting(pData, count, 1.0, &algParams);
     delete pData;
@@ -154,11 +155,11 @@ Result  BaseCursor::Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<st
         }
         m_iPeakIndx = max_idx;
         m_dPeakPos = max_idx * stepH;
-        auto signalValue = max * gSettings.GetSignalCoeff();
+        auto signalValue = max * gPlotData.GetPlotData()->SignalCoeff();
 
         ret.piakHight = signalValue;
         ret.peakPosX = m_dPeakPos;
-        ret.peakPosY = iSpecIndx * gSettings.GetMeasurementStep();
+        ret.peakPosY = iSpecIndx * gPlotData.GetPlotData()->MeasurementStep();
         ret.ratio = 1.0;
         ret.leftX = m_dStartx_key;
         ret.rightX = m_dEndx_key;

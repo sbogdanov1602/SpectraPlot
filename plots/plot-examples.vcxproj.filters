@@ -73,6 +73,9 @@
     <ClCompile Include="Libraries.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="CPlotData.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mainwindow.h">
@@ -124,6 +127,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="Libraries.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CPlotData.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

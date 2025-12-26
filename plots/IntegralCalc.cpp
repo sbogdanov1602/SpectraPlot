@@ -1,6 +1,7 @@
 #include "qcustomplot.h"
 #include "IntegralCalc.h"
 #include "Settings.h"
+#include "CPlotData.h"
 #include "pd_alg/pd_alg.h"
 #include "pd_alg/pd_data.h"
 
@@ -26,7 +27,7 @@ double CIntegralCalc::Calculate()
 	QCPItemPosition* start = m_Line.start;
 	double start_key = start->key();
 	double end_key = end->key();
-	double step = gSettings.GetPointScale() / gSettings.GetPointsNum();
+	double step = gPlotData.GetPlotData()->PointScale() / gPlotData.GetPlotData()->PointsNum();
 	int start_idx = (int)(start_key / step);
 	int end_idx = (int)(end_key / step);
 
@@ -41,7 +42,7 @@ double CIntegralCalc::Calculate()
 	size_t count = m_LstSpecData.size();
 	int* pData = new int[count];
 	for (int k = 0; k < count; k++) {
-		pData[k] = (int)(m_LstSpecData[k] / gSettings.GetSignalCoeff());
+		pData[k] = (int)(m_LstSpecData[k] / gPlotData.GetPlotData()->SignalCoeff());
 	}
 	auto vecPeaks = PDAlg::PeaksDetecting(pData, count, 1.0, &algParams);
 	delete pData;
@@ -59,7 +60,7 @@ double CIntegralCalc::Calculate()
 		end_idx2 = (int)vecPeaks[max_idx].RightBound;
 		beg_v = beg_idx2 * step;
 		end_v = end_idx2 * step;
-		value = vecPeaks[max_idx].Value * gSettings.GetSignalCoeff() * step;
+		value = vecPeaks[max_idx].Value * gPlotData.GetPlotData()->SignalCoeff() * step;
 		for (int i = beg_idx2; i < end_idx2; i++) {
 			half = (m_LstSpecData[i] + m_LstSpecData[i + 1]) * 0.5;
 			result1 += half * step;

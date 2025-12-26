@@ -1,8 +1,4 @@
 {
-	"PointScale": 24.0,
-	"MeasurementStep": 1.0,
-	"SignalCoeff": 0.0000625,
-	"PointsNum": 4000,
 	"NoiseRate": 2,
 	"MaxIterationNum": 4,
 	"ChangeIntervalCoeff": 0.25
