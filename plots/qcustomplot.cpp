@@ -16945,6 +16945,7 @@ void QCPColorGradient::loadPreset(GradientPreset preset)
     case gpPolar:
       setColorInterpolation(ciRGB);
        //base
+      /*
       setColorStopAt(0, QColor(50, 255, 255));
       setColorStopAt(0.18, QColor(10, 70, 255));
       setColorStopAt(0.28, QColor(10, 10, 190));
@@ -16952,16 +16953,18 @@ void QCPColorGradient::loadPreset(GradientPreset preset)
       setColorStopAt(0.72, QColor(190, 10, 10));
       setColorStopAt(0.82, QColor(255, 70, 10));
       setColorStopAt(1, QColor(255, 255, 50));
+      */
       
-      /*
-      setColorStopAt(0, QColor(50, 255, 255));
+      setColorStopAt(0, QColor(245, 255, 255));
+      setColorStopAt(0.03, QColor(50, 190, 255));
+      setColorStopAt(0.06, QColor(30, 100, 255));
       setColorStopAt(0.12, QColor(10, 10, 190));
       setColorStopAt(0.5, QColor(0, 0, 0));
       setColorStopAt(0.80, QColor(190, 10, 10));
       setColorStopAt(0.88, QColor(190, 10, 10));
       setColorStopAt(0.92, QColor(255, 70, 10));
       setColorStopAt(1, QColor(255, 255, 50));
-      */
+      
       break;
     case gpSpectrum:
       setColorInterpolation(ciHSV);
