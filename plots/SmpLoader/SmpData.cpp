@@ -2,6 +2,7 @@
 #include <qmetatype.h>
 #include <qdir.h>
 #include <qsettings.h>
+#include <vector>
 
 SmpData::SmpData():IPlotData()
 {
@@ -64,7 +65,6 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
     if (setMaximum != nullptr) {
         setMaximum(numFiles);
     }
-
     for (auto&& filePath : fileList)
     {
         //progress.setValue(nFiles);
@@ -90,14 +90,16 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
                     pointsNum = i;
                 }
                 m_lstSpecData.push_back(std::vector<double>());
+                dBaseLine = 0.0;
                 i = 0;
                 continue;
             }
             if (m_lstSpecData.empty())
                 continue;
-            auto&& vec = m_lstSpecData.back();
-            bool ok = false;
 
+            auto&& vec = m_lstSpecData.back();
+
+            bool ok = false;
             double val = line.toInt(&ok);
 
             if (!ok)
@@ -105,7 +107,7 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
 
             val *= SignalCoeff();
 
-            if (nFiles == 0 && vec.size() == (m_iMeaningAreaBeg + m_iMeaningAreaLength + 1)) {
+            if (vec.size() == (m_iMeaningAreaBeg + m_iMeaningAreaLength + 1)) {
                 dBaseLine = CalculateBaseLine(vec, m_iMeaningAreaBeg, m_iMeaningAreaLength);
                 CorrectDataToBase(vec, dBaseLine);
             }
