@@ -31,6 +31,8 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
 {
     ClearData();
     double dBaseLine = 0.0;
+    //double maxBaseLine = 0.0;
+    //double minBaseLine = DBL_MAX;
 
     QString fname(&(inFilePath[0]));
     QString dir;
@@ -109,6 +111,14 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
 
             if (vec.size() == (m_iMeaningAreaBeg + m_iMeaningAreaLength + 1)) {
                 dBaseLine = CalculateBaseLine(vec, m_iMeaningAreaBeg, m_iMeaningAreaLength);
+                /*
+                if (dBaseLine > maxBaseLine) {
+                    maxBaseLine = dBaseLine;
+                }
+                if (dBaseLine < minBaseLine) {
+                    minBaseLine = dBaseLine;
+                }
+                */
                 CorrectDataToBase(vec, dBaseLine);
             }
             

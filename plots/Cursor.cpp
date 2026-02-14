@@ -63,6 +63,9 @@ void Cursor::CreateVCursor(QCustomPlot* plot, QPointF beg, QPointF end, QPointF 
     m_textLabel->setFont(QFont(plot->font().family(), 9)); // make font a bit larger
     m_textLabel->setPen(pen); // show black border around text
 
+    m_vTextData.setX(textData.x());
+    m_vTextData.setY(textData.y());
+
     PlotLine(plot, beg, end, pen);
 }
 
@@ -79,6 +82,9 @@ void Cursor::CreateHCursor(QCustomPlot* plot, QPointF beg, QPointF end, QPointF 
     m_textLabel->setText(s);
     m_textLabel->setFont(QFont(plot->font().family(), 9)); // make font a bit larger
     m_textLabel->setPen(pen); // show black border around text
+    
+    m_hTextData.setX(textData.x());
+    m_hTextData.setY(textData.y());
 
 	PlotLine(plot, beg, end, pen);
 }

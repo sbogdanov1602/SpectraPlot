@@ -52,9 +52,38 @@ void C2DIntegralCalc::PrepareIntervals(int iterationNum, double stepH, double st
 	m_rightY = m_endIdx = (int)(end_val / stepV);
 }
 
+void C2DIntegralCalc::InitResult(Result& result) 
+{
+	QCPItemPosition* end = m_vLine.end;
+	QCPItemPosition* start = m_vLine.start;
+	double start_val = start->value();
+	double end_val = end->value();
+
+	QCPItemPosition* endx = m_hLine.end;
+	QCPItemPosition* startx = m_hLine.start;
+	double startx_key = startx->key();
+	double endx_key = endx->key();
+
+	auto vTextData = m_vCursor->VTextData();
+	auto vX = vTextData.x();
+
+	if (startx_key <= vX && vX <= endx_key) {
+		result.peakPosX = vX;
+		result.piakHight = vTextData.y();
+	}
+
+	auto hTextData = m_hCursor->HTextData();
+	auto hX = hTextData.x();
+	if (start_val <= hX && hX < end_val) {
+		result.peakPosY = hX;
+	}
+}
+
 Result C2DIntegralCalc::Calculate()
 {
 	Result ret;
+	InitResult(ret);
+	
 	double stepV = gPlotData.GetPlotData()->MeasurementStep();
 	double stepH = gPlotData.GetPlotData()->PointScale() / gPlotData.GetPlotData()->PointsNum();
 
@@ -98,6 +127,7 @@ Result C2DIntegralCalc::Calculate()
 		}
 		iteration++;
 	}
+	
 	ret.time = QTime::currentTime().toString();
 	ret.date = QDate::currentDate().toString();
 	ret.description = VALUE_COLUMN_NAME;

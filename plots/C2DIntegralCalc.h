@@ -60,5 +60,6 @@ protected:
 	max_peak CalculateHInterval(bool& peaksCount, int& avgNoise);
 	void CalculateMaxPeakInterval(std::vector<TPeak>& peaks, int& left, int& right, int& max_height, int& max_height_idx);
 	void PrepareIntervals(int iterationNum, double stepH, double stepV);
+	void InitResult(Result& result);
 };
 

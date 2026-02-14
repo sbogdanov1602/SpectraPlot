@@ -26,8 +26,12 @@ public:
 	void CreateVCursor(QCustomPlot* plot, QPointF beg, QPointF end, QPointF textData, BaseCursor* baseCursor, QPen pen = QPen(Qt::black));
 	void CreateHCursor(QCustomPlot* plot, QPointF beg, QPointF end, QPointF textData, QPen pen = QPen(Qt::black));
 	void ClearCursor();
+	QPointF& HTextData() {return m_hTextData;}
+	QPointF& VTextData() { return m_vTextData; }
 protected:
 	QCPItemText* m_textLabel;
+	QPointF m_hTextData;
+	QPointF m_vTextData;
 };
 
 class BaseCursor : public Cursor
