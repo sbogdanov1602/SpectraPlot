@@ -93,6 +93,10 @@ int CsvData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
 
             val *= SignalCoeff();
 
+            if (val < 0.0) {
+                val = 0.0;
+            }
+
             if (m_maxSignal < val) {
                 m_maxSignal = val;
             }
