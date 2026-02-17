@@ -26,6 +26,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CchLoader", "CchLoader\CchL
 		{C0197003-1969-4F5B-9A0D-B437A131F853} = {C0197003-1969-4F5B-9A0D-B437A131F853}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CsvLoader", "CsvLoader\CsvLoader.vcxproj", "{1905DB72-A4C9-44DF-A49B-C26EA44BEB96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -56,6 +58,10 @@ Global
 		{1C009018-8646-485C-9120-D79652F0B453}.Debug|x64.Build.0 = Debug|x64
 		{1C009018-8646-485C-9120-D79652F0B453}.Release|x64.ActiveCfg = Release|x64
 		{1C009018-8646-485C-9120-D79652F0B453}.Release|x64.Build.0 = Release|x64
+		{1905DB72-A4C9-44DF-A49B-C26EA44BEB96}.Debug|x64.ActiveCfg = Debug|x64
+		{1905DB72-A4C9-44DF-A49B-C26EA44BEB96}.Debug|x64.Build.0 = Debug|x64
+		{1905DB72-A4C9-44DF-A49B-C26EA44BEB96}.Release|x64.ActiveCfg = Release|x64
+		{1905DB72-A4C9-44DF-A49B-C26EA44BEB96}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
