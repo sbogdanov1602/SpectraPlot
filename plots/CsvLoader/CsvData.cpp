@@ -86,7 +86,7 @@ int CsvData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
             auto&& vec = m_lstSpecData.back();
 
             bool ok = false;
-            double val = line.toInt(&ok);
+            double val = line.toDouble(&ok);
 
             if (!ok)
                 break;
