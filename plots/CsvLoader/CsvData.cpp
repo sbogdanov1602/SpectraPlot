@@ -24,12 +24,14 @@ void CsvData::LoadSettings()
         m_sMapXAxisLabel = settings.value("MapXAxisLabel", "").toString().toStdString();
         m_sMapYAxisLabel = settings.value("MapYAxisLabel", "").toString().toStdString();
         m_sSignalAxisLabel = settings.value("SignalAxisLabel", "").toString().toStdString();
+        m_bBaseLineOn = settings.value("BaseLineOn", true).toBool();
     }
 }
 
 int CsvData::Load(std::string inFilePath, std::function<void(int)>  setProgressDlgValue, std::function<void(int)>  setMaximum, bool loadOneFileOnly)
 {
     ClearData();
+    double dBaseLine = 0.0;
 
     QString fname(&(inFilePath[0]));
     QString dir;
@@ -80,6 +82,8 @@ int CsvData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
 
         QTextStream in(&file);
         m_lstSpecData.push_back(std::vector<double>());
+        dBaseLine = 0.0;
+
         while (!in.atEnd()) {
             QString line = in.readLine();
 
@@ -93,13 +97,22 @@ int CsvData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
 
             val *= SignalCoeff();
 
-            if (val < 0.0) {
-                val = 0.0;
+            if (m_bBaseLineOn) {
+                if (vec.size() == (m_iMeaningAreaBeg + m_iMeaningAreaLength + 1)) {
+                    dBaseLine = CalculateBaseLine(vec, m_iMeaningAreaBeg, m_iMeaningAreaLength);
+                    CorrectDataToBase(vec, dBaseLine);
+                }
+
+                val -= dBaseLine;
+                if (val < 0.0) {
+                    val = 0.0;
+                }
             }
 
             if (m_maxSignal < val) {
                 m_maxSignal = val;
             }
+
             vec.push_back(val);
         }
         in.flush();

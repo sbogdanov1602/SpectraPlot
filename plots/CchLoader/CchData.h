@@ -14,6 +14,7 @@ public:
 	std::string MapYAxisLabel() override;
 	std::string SignalAxisLabel() override;
 protected:
+	bool m_bBaseLineOn;
 	int m_iMeaningAreaBeg;
 	int m_iMeaningAreaLength;
 	float m_fPointScale;

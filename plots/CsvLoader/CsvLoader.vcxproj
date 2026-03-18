@@ -113,6 +113,9 @@
     <ClCompile Include="CsvData.cpp" />
     <ClCompile Include="CsvLoader.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="csv_data.ini" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />

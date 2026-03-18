@@ -24,6 +24,7 @@ void SmpData::LoadSettings()
         m_sMapXAxisLabel = settings.value("MapXAxisLabel", "").toString().toStdString();
         m_sMapYAxisLabel = settings.value("MapYAxisLabel", "").toString().toStdString();
         m_sSignalAxisLabel = settings.value("SignalAxisLabel", "").toString().toStdString();
+        m_bBaseLineOn = settings.value("BaseLineOn", true).toBool();
     }
 }
 
@@ -108,23 +109,25 @@ int SmpData::Load(std::string inFilePath, std::function<void(int)>  setProgressD
                 break;
 
             val *= SignalCoeff();
+ 
+            if (m_bBaseLineOn) {
+                if (vec.size() == (m_iMeaningAreaBeg + m_iMeaningAreaLength + 1)) {
+                    dBaseLine = CalculateBaseLine(vec, m_iMeaningAreaBeg, m_iMeaningAreaLength);
+                    /*
+                    if (dBaseLine > maxBaseLine) {
+                        maxBaseLine = dBaseLine;
+                    }
+                    if (dBaseLine < minBaseLine) {
+                        minBaseLine = dBaseLine;
+                    }
+                    */
+                    CorrectDataToBase(vec, dBaseLine);
+                }
 
-            if (vec.size() == (m_iMeaningAreaBeg + m_iMeaningAreaLength + 1)) {
-                dBaseLine = CalculateBaseLine(vec, m_iMeaningAreaBeg, m_iMeaningAreaLength);
-                /*
-                if (dBaseLine > maxBaseLine) {
-                    maxBaseLine = dBaseLine;
+                val -= dBaseLine;
+                if (val < 0.0) {
+                    val = 0.0;
                 }
-                if (dBaseLine < minBaseLine) {
-                    minBaseLine = dBaseLine;
-                }
-                */
-                CorrectDataToBase(vec, dBaseLine);
-            }
-            
-            val -= dBaseLine;
-            if (val < 0.0) {
-                val = 0.0;
             }
 
             if (m_maxSignal < val) {
