@@ -31,12 +31,12 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.8.2_msvc2022_64</QtInstall>
+    <QtInstall>6.8.3_msvc2022_64</QtInstall>
     <QtModules>core</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>6.8.2_msvc2022_64</QtInstall>
+    <QtInstall>6.8.3_msvc2022_64</QtInstall>
     <QtModules>core</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -69,6 +69,7 @@
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)CommonLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

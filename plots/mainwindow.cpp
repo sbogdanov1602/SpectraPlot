@@ -422,8 +422,8 @@ void MainWindow::onOpenAction()
 
                         auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
                         auto ptrToSetMaximum = std::bind(&QProgressDialog::setMaximum, m_pProgressDlg, std::placeholders::_1);
-
-                        retNFiles = gPlotData.GetPlotData()->Load(fname.toStdString(), ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
+                        auto fileName = fname.toStdString();
+                        retNFiles = gPlotData.GetPlotData()->Load(fileName, ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
                         makeSpecDataT();
 
                         QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));

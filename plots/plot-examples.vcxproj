@@ -67,12 +67,12 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtInstall>6.8.2_msvc2022_64</QtInstall>
+    <QtInstall>6.8.3_msvc2022_64</QtInstall>
     <QtModules>core;gui;widgets;printsupport</QtModules>
     <QtDeploy>true</QtDeploy>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtInstall>6.8.2_msvc2022_64</QtInstall>
+    <QtInstall>6.8.3_msvc2022_64</QtInstall>
     <QtModules>core;gui;widgets;printsupport</QtModules>
     <QtDeploy>true</QtDeploy>
   </PropertyGroup>
@@ -148,7 +148,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4577;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>Default</LanguageStandard>
       <ObjectFileName>debug\</ObjectFileName>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
