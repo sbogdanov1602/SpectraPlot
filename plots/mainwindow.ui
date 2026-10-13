@@ -53,6 +53,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionSpectrion_Data"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -101,6 +102,11 @@
   <action name="actionRemove_base_cursor">
    <property name="text">
     <string>Remove base cursor</string>
+   </property>
+  </action>
+  <action name="actionSpectrion_Data">
+   <property name="text">
+    <string>Spectrion Data</string>
    </property>
   </action>
  </widget>

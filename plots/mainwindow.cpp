@@ -115,6 +115,15 @@ MainWindow::MainWindow(QWidget *parent) :
   QMetaObject::connectSlotsByName(this);
 
   gSettings.Load();
+  if (gSettings.IsUseSpectrionData()) {
+      ui->actionSpectrion_Data->setVisible(true);
+      ui->actionSpectrion_Data->setEnabled(true);
+      QObject::connect(ui->actionSpectrion_Data, &QAction::triggered, this, qOverload<>(&MainWindow::onSpectrionDataAction));
+  }
+  else {
+      ui->actionSpectrion_Data->setEnabled(false);
+      ui->actionSpectrion_Data->setVisible(false);
+  }
   /*
   m_pointStep = gSettings.GetPointScale() / gSettings.GetPointsNum();
   m_measurementStep = gSettings.GetMeasurementStep();
@@ -353,110 +362,155 @@ void MainWindow::onPlotVClick(QCPAbstractPlottable* plottable, int dataIndex, QM
     ui->customPlot->replot();
 }
 
-void MainWindow::onOpenAction()
+QString MainWindow::GetSpectrionDataDir()
 {
-    int retNFiles = 0;
+    QString s = gSettings.SpectrionDir();
+    auto settingsFile = s + "/SpecTest.ini";
+    if (QFile::exists(settingsFile)) {
+        QSettings settings(settingsFile, QSettings::IniFormat);
+        auto list = settings.allKeys();
+        auto val = settings.value("Experiments/CurrentDataDir"); 
+        auto dataDir = val.toByteArray();
+        dataDir = dataDir.replace("<", "").replace(">", "");
+        return dataDir;
+    }
+    return QString("");
+}
+
+void MainWindow::onSpectrionDataAction()
+{
+    //QString s = "C:/Work/Lumex/VS_2026/Spectrion/Prj/Spectrion/Release/Experiments/Plus/Exprt_13_10__13_54_29/test.smp";
+    QString s = GetSpectrionDataDir() + "/test.smp";
+    loadData(s);
+}
+
+QString MainWindow::getDataFile()
+{
     auto curDir = QDir::current();
     QString filter = Dlls.FileFilter();
     auto fname = QFileDialog::getOpenFileName(this, tr("Open Directory"),
         m_dir.isEmpty() ? curDir.dirName() : m_dir, filter, &filter, QFileDialog::Option::ReadOnly);
 
     auto pos = fname.lastIndexOf('/');
-    setWindowTitle(QCoreApplication::translate("MainWindow", "SpectraPlot", nullptr));
     if (pos >= 0)
     {
         m_dir = fname.left(pos);
-        pos = m_dir.lastIndexOf('/');
-        if (pos >= 0) 
+    }
+    return fname;
+}
+
+void MainWindow::loadData(QString fname)
+{
+    int retNFiles = 0;
+    setWindowTitle(QCoreApplication::translate("MainWindow", "SpectraPlot", nullptr));
+    //if (pos >= 0)
+    //{
+        //m_dir = fname.left(pos);
+    qsizetype pos = m_dir.lastIndexOf('/');
+    if (pos >= 0)
+    {
+        m_LastFolder = m_dir.mid(pos + 1);
+        QString s = "SpectraPlot: " + m_LastFolder;
+        setWindowTitle(QCoreApplication::translate("MainWindow", &(s.toStdString()[0]), nullptr));
+    }
+
+    QDir directory(m_dir);
+    pos = fname.lastIndexOf('.');
+    if (pos >= 0) {
+        QString ext = fname.mid(pos + 1);
+
+        m_fileList = directory.entryList(QStringList() << "*." + ext << "*." + ext.toUpper(), QDir::Files);
+
+        if (gPlotData.GetPlotData() != nullptr)
         {
-            m_LastFolder = m_dir.mid(pos + 1);
-            QString s = "SpectraPlot: " + m_LastFolder;
-            setWindowTitle(QCoreApplication::translate("MainWindow", &(s.toStdString()[0]), nullptr));
+            gPlotData.SetPlotData(nullptr);
         }
-        
-        QDir directory(m_dir);
-        pos = fname.lastIndexOf('.');
-        if (pos >= 0) {
-            QString ext = fname.mid(pos + 1);
+        bool loadOneFileOnly = false;
 
-            m_fileList = directory.entryList(QStringList() << "*." + ext << "*." + ext.toUpper(), QDir::Files);
+        if (m_BaseCursor.Exists()) {
+            onRemoveBaseCursor();
+        }
+        clearPlots();
 
-            if (gPlotData.GetPlotData() != nullptr)
-            {
-                gPlotData.SetPlotData(nullptr);
-            }
-            bool loadOneFileOnly = false;
+        ext = ext.toLower();
 
-            if (m_BaseCursor.Exists()) {
-                onRemoveBaseCursor();
-            }
-            clearPlots();
+        auto dllItem = Dlls.GetLib(ext);
 
-            ext = ext.toLower();
+        if (dllItem != nullptr && dllItem->hmodule) {
 
-            auto dllItem = Dlls.GetLib(ext);
+            typedef IPlotData* (__cdecl* MYFUNCTION)(); /* __cdecl* __stdcall* */
 
-            if (dllItem != nullptr && dllItem->hmodule) {
-                
-                typedef IPlotData*(__cdecl* MYFUNCTION)(); /* __cdecl* __stdcall* */
+            auto s = dllItem->funcName.toStdString();
+            auto pStr = &(s[0]);
 
-                auto s = dllItem->funcName.toStdString();
-                auto pStr = &(s[0]);
+            MYFUNCTION pFunction = (MYFUNCTION)GetProcAddress(dllItem->hmodule, pStr);
+            if (pFunction) {
+                gPlotData.SetPlotData(pFunction());
+                loadOneFileOnly = dllItem->loadOneFileOnly;
+                if (gPlotData.GetPlotData()) {
 
-                MYFUNCTION pFunction = (MYFUNCTION)GetProcAddress(dllItem->hmodule, pStr);
-                if (pFunction) {
-                    gPlotData.SetPlotData(pFunction());
-                    loadOneFileOnly = dllItem->loadOneFileOnly;
-                    if (gPlotData.GetPlotData()) {
-
-                        if (m_pProgressDlg != nullptr) {
-                            delete m_pProgressDlg;
-                            m_pProgressDlg = nullptr;
-                        }
-                        int fileCount = (loadOneFileOnly) ? 1 : m_fileList.size();
-                        m_pProgressDlg = new QProgressDialog(tr("Loading files..."), tr("Stop"), 0, fileCount, this);
-                        m_pProgressDlg->setWindowModality(Qt::WindowModal);
-                        QObject::connect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
-                        m_pProgressDlg->show();
-                        m_pProgressDlg->setValue(0);
-
-                        auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
-                        auto ptrToSetMaximum = std::bind(&QProgressDialog::setMaximum, m_pProgressDlg, std::placeholders::_1);
-                        auto fileName = fname.toStdString();
-                        retNFiles = gPlotData.GetPlotData()->Load(fileName, ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
-                        makeSpecDataT();
-
-                        QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
-                        m_pProgressDlg->close();
+                    if (m_pProgressDlg != nullptr) {
                         delete m_pProgressDlg;
                         m_pProgressDlg = nullptr;
-
-                        QMessageBox::information(
-                            this,
-                            "Files are loaded",
-                            QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(gPlotData.GetPlotData()->SpectraNum()),
-                            QMessageBox::StandardButton::Ok);
-
-                        setupColorDataMap(ui->customPlot);
                     }
-                }
-                else
-                {
-                    FreeLibrary(dllItem->hmodule); // Unload the DLL if function not found
-                    dllItem->hmodule = nullptr;
-                    QMessageBox::warning(this, "SpectraPlot", tr("Cannot find a function '%1' in module '%2'.").arg(dllItem->funcName).arg(dllItem->libName));
+                    int fileCount = (loadOneFileOnly) ? 1 : m_fileList.size();
+                    m_pProgressDlg = new QProgressDialog(tr("Loading files..."), tr("Stop"), 0, fileCount, this);
+                    m_pProgressDlg->setWindowModality(Qt::WindowModal);
+                    QObject::connect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
+                    m_pProgressDlg->show();
+                    m_pProgressDlg->setValue(0);
+
+                    auto ptrToSetValue = std::bind(&QProgressDialog::setValue, m_pProgressDlg, std::placeholders::_1);
+                    auto ptrToSetMaximum = std::bind(&QProgressDialog::setMaximum, m_pProgressDlg, std::placeholders::_1);
+                    auto fileName = fname.toStdString();
+                    retNFiles = gPlotData.GetPlotData()->Load(fileName, ptrToSetValue, ptrToSetMaximum, loadOneFileOnly);
+                    makeSpecDataT();
+
+                    QObject::disconnect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
+                    m_pProgressDlg->close();
+                    delete m_pProgressDlg;
+                    m_pProgressDlg = nullptr;
+
+                    QMessageBox::information(
+                        this,
+                        "Files are loaded",
+                        QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(gPlotData.GetPlotData()->SpectraNum()),
+                        QMessageBox::StandardButton::Ok);
+
+                    setupColorDataMap(ui->customPlot);
                 }
             }
-            else {
-                if (dllItem == nullptr) {
-                    QMessageBox::warning(this, "SpectraPlot", tr("Cannot find a record about library for extension '%1'.").arg(ext));
-                }
-                else if (!dllItem->hmodule) {
-                    QMessageBox::warning(this, "SpectraPlot", tr("The library for extension '%1' isn't loaded.").arg(ext));
-                }
+            else
+            {
+                FreeLibrary(dllItem->hmodule); // Unload the DLL if function not found
+                dllItem->hmodule = nullptr;
+                QMessageBox::warning(this, "SpectraPlot", tr("Cannot find a function '%1' in module '%2'.").arg(dllItem->funcName).arg(dllItem->libName));
+            }
+        }
+        else {
+            if (dllItem == nullptr) {
+                QMessageBox::warning(this, "SpectraPlot", tr("Cannot find a record about library for extension '%1'.").arg(ext));
+            }
+            else if (!dllItem->hmodule) {
+                QMessageBox::warning(this, "SpectraPlot", tr("The library for extension '%1' isn't loaded.").arg(ext));
             }
         }
     }
+    //}
+}
+
+void MainWindow::onOpenAction()
+{
+    /*
+    auto curDir = QDir::current();
+    QString filter = Dlls.FileFilter();
+    auto fname = QFileDialog::getOpenFileName(this, tr("Open Directory"),
+        m_dir.isEmpty() ? curDir.dirName() : m_dir, filter, &filter, QFileDialog::Option::ReadOnly);
+
+    auto pos = fname.lastIndexOf('/');
+    */
+    auto fname = getDataFile();
+    loadData(fname);
 }
 
 void MainWindow::clearCursors()

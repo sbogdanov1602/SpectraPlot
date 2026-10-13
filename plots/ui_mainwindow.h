@@ -34,6 +34,7 @@ public:
     QAction *actionCalculate_summ;
     QAction *actionSet_base_cursor;
     QAction *actionRemove_base_cursor;
+    QAction *actionSpectrion_Data;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QSplitter *splitter_3;
@@ -66,6 +67,8 @@ public:
         actionSet_base_cursor->setObjectName("actionSet_base_cursor");
         actionRemove_base_cursor = new QAction(MainWindow);
         actionRemove_base_cursor->setObjectName("actionRemove_base_cursor");
+        actionSpectrion_Data = new QAction(MainWindow);
+        actionSpectrion_Data->setObjectName("actionSpectrion_Data");
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName("centralWidget");
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -117,6 +120,7 @@ public:
         menuBar->addAction(menuView->menuAction());
         menuBar->addAction(menuTools->menuAction());
         menuFile->addAction(actionOpen);
+        menuFile->addAction(actionSpectrion_Data);
         menuView->addAction(actionReset);
         menuTools->addAction(actionCalculate_integral);
         menuTools->addAction(actionCalculate_summ);
@@ -137,6 +141,7 @@ public:
         actionCalculate_summ->setText(QCoreApplication::translate("MainWindow", "Calculate 2D integral", nullptr));
         actionSet_base_cursor->setText(QCoreApplication::translate("MainWindow", "Set base cursor", nullptr));
         actionRemove_base_cursor->setText(QCoreApplication::translate("MainWindow", "Remove base cursor", nullptr));
+        actionSpectrion_Data->setText(QCoreApplication::translate("MainWindow", "Spectrion Data", nullptr));
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
         menuView->setTitle(QCoreApplication::translate("MainWindow", "View", nullptr));
         menuTools->setTitle(QCoreApplication::translate("MainWindow", "Tools", nullptr));

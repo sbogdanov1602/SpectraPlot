@@ -1,4 +1,6 @@
 {
+	"UseSpectrionData": true,
+	"SpectrionDir": "C:\\Work\\Lumex\\VS_2026\\Spectrion\\Prj\\Spectrion\\Release",
 	"NoiseRate": 2,
 	"MaxIterationNum": 4,
 	"ChangeIntervalCoeff": 0.25

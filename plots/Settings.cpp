@@ -11,6 +11,8 @@ CSettings::CSettings()
 	m_NoiseRate = 3;
 	m_MaxIterationNum = 5;
 	m_ChangeCoeff = 0.5;
+	m_bUseSpectrionData = false;
+	m_sSpectrionDir = "";
 }
 
 CSettings::~CSettings()
@@ -33,6 +35,8 @@ void CSettings::Load()
 		if (doc.isObject())
 		{
 			QJsonObject json = doc.object();
+			m_bUseSpectrionData = json["UseSpectrionData"].toBool();
+			m_sSpectrionDir = json["SpectrionDir"].toString();
 			m_NoiseRate = json["NoiseRate"].toInteger();
 			m_MaxIterationNum = json["MaxIterationNum"].toInteger();
 			m_ChangeCoeff = json["ChangeIntervalCoeff"].toDouble();;

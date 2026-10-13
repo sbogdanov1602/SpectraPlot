@@ -51,6 +51,7 @@
 //#include <TextLabelResults.h>
 #include "IntegralModel.h"
 //#include "CommonLib/CommonLib.h"
+#include "Settings.h"
 
 namespace Ui {
 class MainWindow;
@@ -72,6 +73,7 @@ public:
 
 public slots:
 	void onOpenAction();
+	void onSpectrionDataAction();
 	void onPlotDblClick(QCPAbstractPlottable* plottable, int dataIndex, QMouseEvent* event);
 	void onPlotClick(QCPAbstractPlottable* plottable, int dataIndex, QMouseEvent* event);
 	void onPlotHClick(QCPAbstractPlottable* plottable, int dataIndex, QMouseEvent* event);
@@ -142,7 +144,9 @@ private:
   void clearSpecDataT();
   void clearPlots();
   void updateSetBaseCursorAction(bool b);
-
+  QString getDataFile();
+  void loadData(QString fname);
+  QString GetSpectrionDataDir();
 private slots:
   void selectionChanged();
   void selectionHChanged();
