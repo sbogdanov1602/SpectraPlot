@@ -149,6 +149,10 @@ MainWindow::MainWindow(QWidget *parent) :
   updateSetBaseCursorAction(true);
 
   Dlls.Load();
+
+  if (gSettings.IsUseSpectrionData()) {
+      QTimer::singleShot(0, this, &MainWindow::onSpectrionDataAction);
+  }
 }
 
 void MainWindow::restoreWidgetsGeometry()
@@ -366,12 +370,32 @@ QString MainWindow::GetSpectrionDataDir()
 {
     QString s = gSettings.SpectrionDir();
     auto settingsFile = s + "/SpecTest.ini";
+    QString dataDir = "";
     if (QFile::exists(settingsFile)) {
-        QSettings settings(settingsFile, QSettings::IniFormat);
-        auto list = settings.allKeys();
-        auto val = settings.value("Experiments/CurrentDataDir"); 
-        auto dataDir = val.toByteArray();
-        dataDir = dataDir.replace("<", "").replace(">", "");
+        QFile file(settingsFile);
+
+        // Open the file in ReadOnly mode with Text optimization
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qWarning() << "Could not open file for reading:" << file.errorString();
+            return dataDir;
+        }
+
+        QTextStream in(&file);
+        // Explicitly set the encoding to Latin-1/ASCII (optional, default is UTF-8 in Qt 6)
+        in.setEncoding(QStringConverter::Latin1);
+
+        QString fileContent = in.readAll();
+        file.close();
+        QString s("CurrentDataDir=");
+        int p = fileContent.indexOf(s);
+        if (p >= 0) {
+            auto s1 = fileContent.mid(p + s.length());
+            dataDir = s1.mid(1);
+            p = dataDir.indexOf('>');
+            if (p >= 0) {
+                dataDir = dataDir.mid(0, p);
+            }            
+        }
         return dataDir;
     }
     return QString("");
@@ -470,13 +494,13 @@ void MainWindow::loadData(QString fname)
                     m_pProgressDlg->close();
                     delete m_pProgressDlg;
                     m_pProgressDlg = nullptr;
-
+                    /*
                     QMessageBox::information(
                         this,
                         "Files are loaded",
                         QStringLiteral("Files: ") + QString::number(retNFiles) + ", Spectra: " + QString::number(gPlotData.GetPlotData()->SpectraNum()),
                         QMessageBox::StandardButton::Ok);
-
+                    */
                     setupColorDataMap(ui->customPlot);
                 }
             }
