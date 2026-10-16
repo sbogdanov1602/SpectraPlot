@@ -376,7 +376,8 @@ QString MainWindow::GetSpectrionDataDir()
 
         // Open the file in ReadOnly mode with Text optimization
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qWarning() << "Could not open file for reading:" << file.errorString();
+            QString msg = (QObject::tr("Could not open file %1 for reading: ") + file.errorString()).arg(settingsFile);
+            QMessageBox::warning(this, "SpectraPlot", msg, QMessageBox::StandardButton::Ok);
             return dataDir;
         }
 
@@ -394,9 +395,15 @@ QString MainWindow::GetSpectrionDataDir()
             p = dataDir.indexOf('>');
             if (p >= 0) {
                 dataDir = dataDir.mid(0, p);
+                m_dir = dataDir;
             }            
         }
         return dataDir;
+    }
+    else {
+        QString msg("");
+        msg.append(QObject::tr("Cannot find file: %1").arg(settingsFile));
+        QMessageBox::warning(this, "SpectraPlot", msg, QMessageBox::StandardButton::Ok);
     }
     return QString("");
 }
@@ -412,7 +419,7 @@ QString MainWindow::getDataFile()
 {
     auto curDir = QDir::current();
     QString filter = Dlls.FileFilter();
-    auto fname = QFileDialog::getOpenFileName(this, tr("Open Directory"),
+    auto fname = QFileDialog::getOpenFileName(this, QObject::tr("Open Directory"),
         m_dir.isEmpty() ? curDir.dirName() : m_dir, filter, &filter, QFileDialog::Option::ReadOnly);
 
     auto pos = fname.lastIndexOf('/');
@@ -426,16 +433,21 @@ QString MainWindow::getDataFile()
 void MainWindow::loadData(QString fname)
 {
     int retNFiles = 0;
-    setWindowTitle(QCoreApplication::translate("MainWindow", "SpectraPlot", nullptr));
+    setWindowTitle(QObject::tr("SpectraPlot"));
     //if (pos >= 0)
     //{
         //m_dir = fname.left(pos);
     qsizetype pos = m_dir.lastIndexOf('/');
+    
+    if (pos == -1) {
+        pos = m_dir.lastIndexOf('\\');
+    }
+
     if (pos >= 0)
     {
         m_LastFolder = m_dir.mid(pos + 1);
         QString s = "SpectraPlot: " + m_LastFolder;
-        setWindowTitle(QCoreApplication::translate("MainWindow", &(s.toStdString()[0]), nullptr));
+        setWindowTitle(QObject::tr(&(s.toStdString()[0])));
     }
 
     QDir directory(m_dir);
@@ -478,7 +490,7 @@ void MainWindow::loadData(QString fname)
                         m_pProgressDlg = nullptr;
                     }
                     int fileCount = (loadOneFileOnly) ? 1 : m_fileList.size();
-                    m_pProgressDlg = new QProgressDialog(tr("Loading files..."), tr("Stop"), 0, fileCount, this);
+                    m_pProgressDlg = new QProgressDialog(QObject::tr("Loading files..."), QObject::tr("Stop"), 0, fileCount, this);
                     m_pProgressDlg->setWindowModality(Qt::WindowModal);
                     QObject::connect(m_pProgressDlg, &QProgressDialog::canceled, this, qOverload<>(&MainWindow::progressDlgWasCanceled));
                     m_pProgressDlg->show();
@@ -508,15 +520,15 @@ void MainWindow::loadData(QString fname)
             {
                 FreeLibrary(dllItem->hmodule); // Unload the DLL if function not found
                 dllItem->hmodule = nullptr;
-                QMessageBox::warning(this, "SpectraPlot", tr("Cannot find a function '%1' in module '%2'.").arg(dllItem->funcName).arg(dllItem->libName));
+                QMessageBox::warning(this, QObject::tr("SpectraPlot"), QObject::tr("Cannot find a function '%1' in module '%2'.").arg(dllItem->funcName).arg(dllItem->libName));
             }
         }
         else {
             if (dllItem == nullptr) {
-                QMessageBox::warning(this, "SpectraPlot", tr("Cannot find a record about library for extension '%1'.").arg(ext));
+                QMessageBox::warning(this, QObject::tr("SpectraPlot"), QObject::tr("Cannot find a record about library for extension '%1'.").arg(ext));
             }
             else if (!dllItem->hmodule) {
-                QMessageBox::warning(this, "SpectraPlot", tr("The library for extension '%1' isn't loaded.").arg(ext));
+                QMessageBox::warning(this, QObject::tr("SpectraPlot"), QObject::tr("The library for extension '%1' isn't loaded.").arg(ext));
             }
         }
     }
@@ -797,7 +809,7 @@ void MainWindow::selectionHChanged()
 
 void MainWindow::keyPressEvent(QKeyEvent* event) {
     if (event->modifiers() & Qt::ControlModifier) {
-        ui->statusBar->showMessage("Ctrl key is pressed");
+        ui->statusBar->showMessage(QObject::tr("Ctrl key is pressed"));
         if(ui->customPlot2->selectionRectMode() != QCP::SelectionRectMode::srmSelect) {
             ui->customPlot2->setSelectionRectMode(QCP::SelectionRectMode::srmSelect);
             ui->customPlot2->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
@@ -808,7 +820,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event) {
         }
     }
     else {
-        ui->statusBar->showMessage("Press Escape key");
+        ui->statusBar->showMessage(QObject::tr("Press Escape key"));
         if (event->key() == Qt::Key_Escape) {
             ClearLines();
             ClearResults();
@@ -845,7 +857,7 @@ void MainWindow::ClearResults()
 
 void MainWindow::keyReleaseEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Control) {
-        ui->statusBar->showMessage("Ctrl key released");
+        ui->statusBar->showMessage(QObject::tr("Ctrl key released"));
         ui->customPlot2->setSelectionRectMode(QCP::SelectionRectMode::srmNone);
         ui->customPlot2->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);// | QCP::iSelectPlottables);
         ui->customPlotH->setSelectionRectMode(QCP::SelectionRectMode::srmNone);
@@ -863,7 +875,7 @@ void MainWindow::onCalculateIntegralAction()
         //ui->customPlotH_2->replot();
     }
     else {
-        QMessageBox::warning(this, tr("SpectraPlot"), tr("Select horizontal calculation interval."));
+        QMessageBox::warning(this, QObject::tr("SpectraPlot"), QObject::tr("Select horizontal calculation interval."));
     }
 }
 
@@ -900,7 +912,7 @@ void MainWindow::onCalculateSummAction()
         ui->customPlot->replot();
     }
     else {
-        QMessageBox::warning(this, tr("SpectraPlot"), tr("Select horizontal and vertical calculation intervals."));
+        QMessageBox::warning(this, QObject::tr("SpectraPlot"), QObject::tr("Select horizontal and vertical calculation intervals."));
     }
 }
 
@@ -965,7 +977,7 @@ void MainWindow::onSetBaseCursor()
         updateSetBaseCursorAction(false);
     }
     else {
-        QMessageBox::warning(this, tr("SpectraPlot"), tr("Select horizontal interval to find a peak."));
+        QMessageBox::warning(this, tr("SpectraPlot"), QObject::tr("Select horizontal interval to find a peak."));
     }
 }
 
