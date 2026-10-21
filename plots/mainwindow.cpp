@@ -107,7 +107,9 @@ MainWindow::MainWindow(QWidget *parent) :
   QObject::connect(ui->customPlot, &QCustomPlot::plottableClick, this, qOverload<QCPAbstractPlottable*, int, QMouseEvent*>(&MainWindow::onPlotClick));
   QObject::connect(ui->customPlotH, &QCustomPlot::plottableClick, this, qOverload<QCPAbstractPlottable*, int, QMouseEvent*>(&MainWindow::onPlotHClick));
   QObject::connect(ui->customPlot2, &QCustomPlot::plottableClick, this, qOverload<QCPAbstractPlottable*, int, QMouseEvent*>(&MainWindow::onPlotVClick));
-  
+
+  QObject::connect(ui->customPlot, &QCustomPlot::itemClick, this, qOverload<QCPAbstractItem*, QMouseEvent*>(&MainWindow::onItemClick));//plottableClick
+
   //QObject::connect(ui->customPlot2, &QCustomPlot::selectionChangedByUser, this, qOverload<>(&MainWindow::selectionChanged/*SLOT(selectionChanged()*/));
   connect(ui->customPlot2, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
   connect(ui->customPlotH, SIGNAL(selectionChangedByUser()), this, SLOT(selectionHChanged()));
@@ -993,6 +995,11 @@ void MainWindow::onRemoveBaseCursor()
         ui->tableViewH_2->repaint();
     }
     updateSetBaseCursorAction(true);
+}
+
+void MainWindow::onItemClick(QCPAbstractItem* ai, QMouseEvent* event)
+{
+    onPlotClick(ui->customPlot->plottable(), 0, event);
 }
 
 void MainWindow::updateSetBaseCursorAction(bool bEnabled)

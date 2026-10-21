@@ -83,6 +83,8 @@ public slots:
 	void onCalculateSummAction();
 	void onSetBaseCursor();
 	void onRemoveBaseCursor();
+
+	void onItemClick(QCPAbstractItem* ai, QMouseEvent* event);
 private:
   Ui::MainWindow *ui;
   QString demoName;
