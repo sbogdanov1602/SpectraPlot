@@ -69,6 +69,10 @@
     <addaction name="actionCalculate_summ"/>
     <addaction name="actionSet_base_cursor"/>
     <addaction name="actionRemove_base_cursor"/>
+    <addaction name="separator"/>
+    <addaction name="actionApply_Standard"/>
+    <addaction name="actionAppli_Log10"/>
+    <addaction name="actionApply_Ln"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -107,6 +111,21 @@
   <action name="actionSpectrion_Data">
    <property name="text">
     <string>Spectrion Data</string>
+   </property>
+  </action>
+  <action name="actionAppli_Log10">
+   <property name="text">
+    <string>Apply Log10</string>
+   </property>
+  </action>
+  <action name="actionApply_Ln">
+   <property name="text">
+    <string>Apply Ln</string>
+   </property>
+  </action>
+  <action name="actionApply_Standard">
+   <property name="text">
+    <string>Apply Standard</string>
    </property>
   </action>
  </widget>

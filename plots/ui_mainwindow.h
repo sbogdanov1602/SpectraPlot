@@ -35,6 +35,9 @@ public:
     QAction *actionSet_base_cursor;
     QAction *actionRemove_base_cursor;
     QAction *actionSpectrion_Data;
+    QAction *actionAppli_Log10;
+    QAction *actionApply_Ln;
+    QAction *actionApply_Standard;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QSplitter *splitter_3;
@@ -69,6 +72,12 @@ public:
         actionRemove_base_cursor->setObjectName("actionRemove_base_cursor");
         actionSpectrion_Data = new QAction(MainWindow);
         actionSpectrion_Data->setObjectName("actionSpectrion_Data");
+        actionAppli_Log10 = new QAction(MainWindow);
+        actionAppli_Log10->setObjectName("actionAppli_Log10");
+        actionApply_Ln = new QAction(MainWindow);
+        actionApply_Ln->setObjectName("actionApply_Ln");
+        actionApply_Standard = new QAction(MainWindow);
+        actionApply_Standard->setObjectName("actionApply_Standard");
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName("centralWidget");
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -126,6 +135,10 @@ public:
         menuTools->addAction(actionCalculate_summ);
         menuTools->addAction(actionSet_base_cursor);
         menuTools->addAction(actionRemove_base_cursor);
+        menuTools->addSeparator();
+        menuTools->addAction(actionApply_Standard);
+        menuTools->addAction(actionAppli_Log10);
+        menuTools->addAction(actionApply_Ln);
 
         retranslateUi(MainWindow);
 
@@ -142,6 +155,9 @@ public:
         actionSet_base_cursor->setText(QCoreApplication::translate("MainWindow", "Set base cursor", nullptr));
         actionRemove_base_cursor->setText(QCoreApplication::translate("MainWindow", "Remove base cursor", nullptr));
         actionSpectrion_Data->setText(QCoreApplication::translate("MainWindow", "Spectrion Data", nullptr));
+        actionAppli_Log10->setText(QCoreApplication::translate("MainWindow", "Apply Log10", nullptr));
+        actionApply_Ln->setText(QCoreApplication::translate("MainWindow", "Apply Ln", nullptr));
+        actionApply_Standard->setText(QCoreApplication::translate("MainWindow", "Apply Standard", nullptr));
         menuFile->setTitle(QCoreApplication::translate("MainWindow", "File", nullptr));
         menuView->setTitle(QCoreApplication::translate("MainWindow", "View", nullptr));
         menuTools->setTitle(QCoreApplication::translate("MainWindow", "Tools", nullptr));

@@ -65,7 +65,7 @@ public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
   
-  void setupColorDataMap(QCustomPlot* customPlot);
+  void setupColorDataMap(QCustomPlot* customPlot, std::function<std::vector<double>(const std::vector<double>&)> func = nullptr);
   void setProgressDlgValue(int value);
   void closeProgressDlg();
   void progressDlgWasCanceled();
@@ -83,6 +83,9 @@ public slots:
 	void onCalculateSummAction();
 	void onSetBaseCursor();
 	void onRemoveBaseCursor();
+	void onApplyLog10();
+	void onApplyLn();
+	void onApplyStandard();
 
 	void onItemClick(QCPAbstractItem* ai, QMouseEvent* event);
 private:
@@ -149,6 +152,13 @@ private:
   QString getDataFile();
   void loadData(QString fname);
   QString GetSpectrionDataDir();
+
+  std::function<std::vector<double>(const std::vector<double>&)> m_funcLogarithm10;
+  std::vector<double> funcLogarithm10(const std::vector<double>& v);
+
+  std::function<std::vector<double>(const std::vector<double>&)> m_funcLogarithmE;
+  std::vector<double>  funcLogarithmE(const std::vector<double>& v);
+
 private slots:
   void selectionChanged();
   void selectionHChanged();

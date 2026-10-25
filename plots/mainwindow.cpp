@@ -110,9 +110,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
   QObject::connect(ui->customPlot, &QCustomPlot::itemClick, this, qOverload<QCPAbstractItem*, QMouseEvent*>(&MainWindow::onItemClick));//plottableClick
 
+  QObject::connect(ui->actionAppli_Log10, &QAction::triggered, this, qOverload<>(&MainWindow::onApplyLog10));
+  QObject::connect(ui->actionApply_Ln, &QAction::triggered, this, qOverload<>(&MainWindow::onApplyLn));
+  QObject::connect(ui->actionApply_Standard, &QAction::triggered, this, qOverload<>(&MainWindow::onApplyStandard));
+
   //QObject::connect(ui->customPlot2, &QCustomPlot::selectionChangedByUser, this, qOverload<>(&MainWindow::selectionChanged/*SLOT(selectionChanged()*/));
   connect(ui->customPlot2, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
   connect(ui->customPlotH, SIGNAL(selectionChangedByUser()), this, SLOT(selectionHChanged()));
+
+  m_funcLogarithm10 = std::bind(&MainWindow::funcLogarithm10, this, std::placeholders::_1);
+  m_funcLogarithmE = std::bind(&MainWindow::funcLogarithmE, this, std::placeholders::_1);
 
   QMetaObject::connectSlotsByName(this);
 
@@ -410,6 +417,28 @@ QString MainWindow::GetSpectrionDataDir()
     return QString("");
 }
 
+std::vector<double> MainWindow::funcLogarithm10(const std::vector<double>& v)
+{
+    std::vector<double> result(v.size());
+    for (size_t i = 0; i < v.size(); ++i) {
+        result[i] = v[i] / gPlotData.GetPlotData()->SignalCoeff();
+        result[i] *= log10(result[i] + 1.0);
+        result[i] *= gPlotData.GetPlotData()->SignalCoeff();
+    }
+    return result;
+}
+
+std::vector<double> MainWindow::funcLogarithmE(const std::vector<double>& v)
+{
+    std::vector<double> result(v.size());
+    for (size_t i = 0; i < v.size(); ++i) {
+        result[i] = v[i] / gPlotData.GetPlotData()->SignalCoeff();
+        result[i] *= log(result[i] + 1.0);
+        result[i] *= gPlotData.GetPlotData()->SignalCoeff();
+    }
+    return result;
+}
+
 void MainWindow::onSpectrionDataAction()
 {
     //QString s = "C:/Work/Lumex/VS_2026/Spectrion/Prj/Spectrion/Release/Experiments/Plus/Exprt_13_10__13_54_29/test.smp";
@@ -539,14 +568,6 @@ void MainWindow::loadData(QString fname)
 
 void MainWindow::onOpenAction()
 {
-    /*
-    auto curDir = QDir::current();
-    QString filter = Dlls.FileFilter();
-    auto fname = QFileDialog::getOpenFileName(this, tr("Open Directory"),
-        m_dir.isEmpty() ? curDir.dirName() : m_dir, filter, &filter, QFileDialog::Option::ReadOnly);
-
-    auto pos = fname.lastIndexOf('/');
-    */
     auto fname = getDataFile();
     loadData(fname);
 }
@@ -595,7 +616,7 @@ void MainWindow::clearPlots()
     ui->customPlot2->replot();
 }
 
-void MainWindow::setupColorDataMap(QCustomPlot* customPlot)
+void MainWindow::setupColorDataMap(QCustomPlot* customPlot, std::function<std::vector<double>(const std::vector<double>&)> func)
 {
     demoName = "Color Data Map";
     if(gPlotData.GetPlotData() != nullptr && gPlotData.GetPlotData()->LstSpecData().size() > 0)
@@ -627,11 +648,17 @@ void MainWindow::setupColorDataMap(QCustomPlot* customPlot)
         double x, y, z;
         for (int yIndex = 0; yIndex < ny; ++yIndex)
         {
-            auto v = gPlotData.GetPlotData()->LstSpecData().at(yIndex);
-            for (int xIndex = 0; xIndex < nx; ++xIndex)
+			std::vector<double> v;
+            if (func) {
+				v = func(gPlotData.GetPlotData()->LstSpecData().at(yIndex));
+            }
+            else {
+                v = gPlotData.GetPlotData()->LstSpecData().at(yIndex);
+            }
+
+            for (int xIndex = 0; xIndex < v.size(); ++xIndex)
             {
-                m_colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
-                z = v.at(xIndex);
+                z = v[xIndex];
                 m_colorMap->data()->setCell(xIndex, yIndex, z);
             }
         }
@@ -995,6 +1022,21 @@ void MainWindow::onRemoveBaseCursor()
         ui->tableViewH_2->repaint();
     }
     updateSetBaseCursorAction(true);
+}
+
+void MainWindow::onApplyLn()
+{
+    setupColorDataMap(ui->customPlot, m_funcLogarithmE);
+}
+
+void MainWindow::onApplyLog10()
+{
+    setupColorDataMap(ui->customPlot, m_funcLogarithm10);
+}
+
+void MainWindow::onApplyStandard()
+{
+    setupColorDataMap(ui->customPlot);
 }
 
 void MainWindow::onItemClick(QCPAbstractItem* ai, QMouseEvent* event)
