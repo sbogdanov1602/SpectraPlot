@@ -130,7 +130,7 @@ Result C2DIntegralCalc::Calculate()
 	
 	ret.time = QTime::currentTime().toString();
 	ret.date = QDate::currentDate().toString();
-	ret.description = VALUE_COLUMN_NAME;
+	ret.description = QString(VALUE_COLUMN_NAME);
 	return ret;
 }
 

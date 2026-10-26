@@ -32,6 +32,12 @@ int main(int argc, char *argv[])
   QApplication::setGraphicsSystem("raster");
 #endif
   QApplication a(argc, argv);
+
+  QString curPath = QDir::currentPath();
+  QTranslator* translator = new QTranslator(&a);
+  translator->load("ru_RU", curPath);
+  bool b = a.installTranslator(translator);
+
   MainWindow w;
   w.show();
   

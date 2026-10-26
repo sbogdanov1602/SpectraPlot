@@ -14,17 +14,17 @@
     <message>
         <location filename="IntegralTableView.cpp" line="9"/>
         <source>Delete selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить помеченное</translation>
     </message>
     <message>
         <location filename="IntegralTableView.cpp" line="10"/>
         <source>Delete all</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить все</translation>
     </message>
     <message>
         <location filename="IntegralTableView.cpp" line="11"/>
         <source>Save to .csv file</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить как .csv файл</translation>
     </message>
 </context>
 <context>
