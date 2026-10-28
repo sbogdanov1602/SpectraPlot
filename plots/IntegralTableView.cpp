@@ -6,9 +6,9 @@ IntegralTableView::IntegralTableView(QWidget* parent) :QTableView(parent)
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	setSelectionMode(QAbstractItemView::MultiSelection);
 
-    QAction* deleteSelectedAction = new QAction(tr("Delete selected"));
-    QAction* deleteAllAction = new QAction(tr("Delete all"));
-    QAction* saveAsCsvAction = new QAction(tr("Save to .csv file"));
+    QAction* deleteSelectedAction = new QAction(QObject::tr("Delete selected"));
+    QAction* deleteAllAction = new QAction(QObject::tr("Delete all"));
+    QAction* saveAsCsvAction = new QAction(QObject::tr("Save to .csv file"));
     setContextMenuPolicy(Qt::ActionsContextMenu);
 	addAction(deleteSelectedAction);
     addAction(deleteAllAction);

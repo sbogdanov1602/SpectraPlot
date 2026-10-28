@@ -10,24 +10,6 @@
     </message>
 </context>
 <context>
-    <name>IntegralTableView</name>
-    <message>
-        <location filename="IntegralTableView.cpp" line="9"/>
-        <source>Delete selected</source>
-        <translation>Удалить помеченное</translation>
-    </message>
-    <message>
-        <location filename="IntegralTableView.cpp" line="10"/>
-        <source>Delete all</source>
-        <translation>Удалить все</translation>
-    </message>
-    <message>
-        <location filename="IntegralTableView.cpp" line="11"/>
-        <source>Save to .csv file</source>
-        <translation>Сохранить как .csv файл</translation>
-    </message>
-</context>
-<context>
     <name>MainWindow</name>
     <message>
         <location filename="mainwindow.ui" line="14"/>
@@ -103,6 +85,21 @@
 </context>
 <context>
     <name>QObject</name>
+    <message>
+        <location filename="IntegralTableView.cpp" line="9"/>
+        <source>Delete selected</source>
+        <translation>Удалить помеченное</translation>
+    </message>
+    <message>
+        <location filename="IntegralTableView.cpp" line="10"/>
+        <source>Delete all</source>
+        <translation>Удалить все</translation>
+    </message>
+    <message>
+        <location filename="IntegralTableView.cpp" line="11"/>
+        <source>Save to .csv file</source>
+        <translation>Сохранить как .csv файл</translation>
+    </message>
     <message>
         <location filename="mainwindow.cpp" line="388"/>
         <source>Could not open file %1 for reading: </source>
