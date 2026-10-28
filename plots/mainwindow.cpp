@@ -200,9 +200,8 @@ void MainWindow::restoreWidgetsGeometry()
     }
 }
 
-void MainWindow::plotOneGraph(QCustomPlot* customPlot, std::vector<double> in)
+void MainWindow::setDataOneGraph(QCustomPlot* customPlot, std::vector<double> in)
 {
-    demoName = "Spectrum";
     int size = in.size();
     QVector<double> x, y;
     double v;
@@ -224,6 +223,14 @@ void MainWindow::plotOneGraph(QCustomPlot* customPlot, std::vector<double> in)
         customPlot->graph(0)->data()->clear();
     }
     customPlot->graph(0)->setData(x, y);
+}
+
+void MainWindow::plotOneGraph(QCustomPlot* customPlot, std::vector<double> in)
+{
+    demoName = "Spectrum";
+
+    setDataOneGraph(customPlot, in);
+
     // give the axes some labels:
     customPlot->xAxis->setLabel(QString(&(gPlotData.GetPlotData()->MapXAxisLabel()[0]))/*"t (ms)"*/);
     customPlot->yAxis->setLabel(QString(&(gPlotData.GetPlotData()->SignalAxisLabel()[0]))/*"signal (V)"*/);
@@ -233,14 +240,10 @@ void MainWindow::plotOneGraph(QCustomPlot* customPlot, std::vector<double> in)
     //customPlot->graph(0)->data()->keyRange(QCPRange(0, 24.0));
     customPlot->axisRect()->setupFullAxesBox(true);
     customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);// | QCP::iSelectPlottables);
-    //customPlot->setSelectionRectMode(QCP::SelectionRectMode::srmSelect);
-
- //   customPlot->replot();
 }
 
-void MainWindow::plotTwoGraph(QCustomPlot* customPlot, std::vector<double> in)
+void MainWindow::setDataTwoGraph(QCustomPlot* customPlot, std::vector<double> in)
 {
-    demoName = "";
     int size = in.size();
     QVector<double> x, y;
     double v;
@@ -264,6 +267,14 @@ void MainWindow::plotTwoGraph(QCustomPlot* customPlot, std::vector<double> in)
     }
 
     customPlot->graph(0)->setData(x, y);
+}
+
+void MainWindow::plotTwoGraph(QCustomPlot* customPlot, std::vector<double> in)
+{
+    demoName = "";
+    
+    setDataTwoGraph(customPlot, in);
+
     // give the axes some labels:
     customPlot->yAxis->setLabel(QString(&(gPlotData.GetPlotData()->MapYAxisLabel()[0]))/*"t (sec)"*/);
     customPlot->xAxis->setLabel(QString(&(gPlotData.GetPlotData()->SignalAxisLabel()[0]))/*"signal (V)"*/);
@@ -307,9 +318,9 @@ void MainWindow::onPlotClick(QCPAbstractPlottable* plottable, int dataIndex, QMo
     auto valueRange = plottable->getValueRange(b1);
 
     m_spectrumIdx = (int)(value / gPlotData.GetPlotData()->MeasurementStep());
-    plotOneGraph(ui->customPlot2, gPlotData.GetPlotData()->LstSpecData()[m_spectrumIdx]);
+    setDataOneGraph(ui->customPlot2, gPlotData.GetPlotData()->LstSpecData()[m_spectrumIdx]);
     m_pointIdx = (int)(key / m_pointStep);
-    plotTwoGraph(ui->customPlotH, LstSpecDataT()[m_pointIdx]);
+    setDataTwoGraph(ui->customPlotH, LstSpecDataT()[m_pointIdx]);
 
     auto signalValue = gPlotData.GetPlotData()->LstSpecData()[m_spectrumIdx].at(m_pointIdx);
 
@@ -591,11 +602,10 @@ void MainWindow::onResetAction()
         ui->customPlot->rescaleAxes();
         plotOneGraph(ui->customPlot2, gPlotData.GetPlotData()->LstSpecData().at(0));
         plotTwoGraph(ui->customPlotH, LstSpecDataT().at(0));
-        
+
         ui->customPlotH->replot();
         ui->customPlot2->replot();
         ui->customPlot->replot();
- //       ui->customPlotH_2->replot();
     }
 }
 

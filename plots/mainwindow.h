@@ -136,7 +136,9 @@ private:
   QCPMarginGroup* m_marginGroup;
 
   void plotOneGraph(QCustomPlot* customPlot, std::vector<double> in);
+  void setDataOneGraph(QCustomPlot* customPlot, std::vector<double> in);
   void plotTwoGraph(QCustomPlot* customPlot, std::vector<double> in);
+  void setDataTwoGraph(QCustomPlot* customPlot, std::vector<double> in);
   void restoreWidgetsGeometry();
   void storeWidgetsGeometry();
 
