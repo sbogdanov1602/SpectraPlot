@@ -16954,7 +16954,7 @@ void QCPColorGradient::loadPreset(GradientPreset preset)
       setColorStopAt(0.82, QColor(255, 70, 10));
       setColorStopAt(1, QColor(255, 255, 50));
       */
-      
+      ////* Standard
       setColorStopAt(0, QColor(245, 255, 255));
       setColorStopAt(0.03, QColor(50, 190, 255));
       setColorStopAt(0.06, QColor(30, 100, 255));
@@ -16964,7 +16964,31 @@ void QCPColorGradient::loadPreset(GradientPreset preset)
       setColorStopAt(0.88, QColor(190, 10, 10));
       setColorStopAt(0.92, QColor(255, 70, 10));
       setColorStopAt(1, QColor(255, 255, 50));
-      
+
+
+      //
+      /* Experiment
+      setColorStopAt(0, QColor(245, 255, 255));
+      setColorStopAt(0.015, QColor(50, 190, 255));
+      setColorStopAt(0.03, QColor(30, 100, 255));
+      setColorStopAt(0.06, QColor(10, 10, 190));
+      setColorStopAt(0.12, QColor(0, 0, 0));
+      setColorStopAt(0.5, QColor(190, 10, 10));
+      setColorStopAt(0.8, QColor(190, 10, 10));
+      setColorStopAt(0.88, QColor(255, 70, 10));
+      setColorStopAt(1, QColor(255, 255, 50));
+      */
+      /*
+      setColorStopAt(0, QColor(144, 165, 247));
+      setColorStopAt(0.03, QColor(95, 220, 49));
+      setColorStopAt(0.06, QColor(255, 242, 51));
+      setColorStopAt(0.12, QColor(255, 173, 7));
+      setColorStopAt(0.5, QColor(255, 127, 127));
+      //setColorStopAt(0.80, QColor(190, 10, 10));
+      //setColorStopAt(0.88, QColor(190, 10, 10));
+      //setColorStopAt(0.92, QColor(255, 70, 10));
+      setColorStopAt(1, QColor(255, 255, 255));
+      */
       break;
     case gpSpectrum:
       setColorInterpolation(ciHSV);

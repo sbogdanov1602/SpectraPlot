@@ -422,7 +422,7 @@ std::vector<double> MainWindow::funcLogarithm10(const std::vector<double>& v)
     std::vector<double> result(v.size());
     for (size_t i = 0; i < v.size(); ++i) {
         result[i] = v[i] / gPlotData.GetPlotData()->SignalCoeff();
-        result[i] *= log10(result[i] + 1.0);
+        result[i] *= log10(result[i] + 1.0);// / 3.0;//log10(//log10(result[i] + 1.0);
         result[i] *= gPlotData.GetPlotData()->SignalCoeff();
     }
     return result;

@@ -33,9 +33,9 @@ int main(int argc, char *argv[])
 #endif
   QApplication a(argc, argv);
 
-  QString curPath = QDir::currentPath();
+  QString path = QDir::currentPath() + "\\translations";
   QTranslator* translator = new QTranslator(&a);
-  translator->load("ru_RU", curPath);
+  translator->load("ru_RU", path);
   bool b = a.installTranslator(translator);
 
   MainWindow w;
