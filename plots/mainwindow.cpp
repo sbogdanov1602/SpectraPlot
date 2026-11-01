@@ -102,7 +102,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
   QObject::connect(ui->actionCalculate_integral, &QAction::triggered, this, qOverload<>(&MainWindow::onCalculateIntegralAction));
   QObject::connect(ui->actionCalculate_summ, &QAction::triggered, this, qOverload<>(&MainWindow::onCalculateSummAction));
-
+  
+  QObject::connect(ui->customPlot, &QCustomPlot::mouseWheel, this, qOverload<QWheelEvent*>(&MainWindow::onMouseWheel));
   QObject::connect(ui->customPlot, &QCustomPlot::plottableDoubleClick, this, qOverload<QCPAbstractPlottable*, int, QMouseEvent*>(&MainWindow::onPlotDblClick));//plottableClick
   QObject::connect(ui->customPlot, &QCustomPlot::plottableClick, this, qOverload<QCPAbstractPlottable*, int, QMouseEvent*>(&MainWindow::onPlotClick));
   QObject::connect(ui->customPlotH, &QCustomPlot::plottableClick, this, qOverload<QCPAbstractPlottable*, int, QMouseEvent*>(&MainWindow::onPlotHClick));
@@ -1060,6 +1061,10 @@ void MainWindow::updateSetBaseCursorAction(bool bEnabled)
     ui->actionRemove_base_cursor->setEnabled(!bEnabled);
 }
 
+void MainWindow::onMouseWheel(QWheelEvent* event)
+{
+    int i = 0;
+}
 
 
 

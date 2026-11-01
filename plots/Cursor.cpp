@@ -135,7 +135,7 @@ Result  BaseCursor::Create(QCustomPlot* plot, QCPItemLine* hLine, std::vector<st
     algParams.iLeftLim = leftX;
     algParams.iRightLim = rightX;
     //algParams.iMaxPeakCount = 1;
-    algParams.iNoiseRate = gSettings.GetNoiseRate();
+    algParams.dNoiseRate = gSettings.GetNoiseRate();
 
     int* pData = new int[count];
     for (int k = 0; k < count; k++) {

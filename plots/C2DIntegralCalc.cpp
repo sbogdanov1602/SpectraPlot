@@ -142,7 +142,7 @@ C2DIntegralCalc::max_peak C2DIntegralCalc::CalculateHInterval(bool& peaksExist, 
 	algParams.iLeftLim = m_leftX;
 	algParams.iRightLim = m_rightX;
 	//algParams.iMaxPeakCount = 1;
-	algParams.iNoiseRate = gSettings.GetNoiseRate();
+	algParams.dNoiseRate = gSettings.GetNoiseRate();
 
 	size_t count = m_LstSpecData.at(0).size();
 
@@ -203,7 +203,7 @@ void C2DIntegralCalc::CalculateVInterval(int point_idx, int& leftV, int& rightV,
 	algParams.iLeftLim = m_leftY;
 	algParams.iRightLim = m_rightY;
 	//algParams.iMaxPeakCount = 1;
-	algParams.iNoiseRate = gSettings.GetNoiseRate();
+	algParams.dNoiseRate = gSettings.GetNoiseRate();
 
 	size_t spCount = m_LstSpecDataT.at(point_idx).size();
 

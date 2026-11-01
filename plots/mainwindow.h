@@ -164,7 +164,7 @@ private:
 private slots:
   void selectionChanged();
   void selectionHChanged();
-
+  void onMouseWheel(QWheelEvent* event);
 };
 
 #endif // MAINWINDOW_H

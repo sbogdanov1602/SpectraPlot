@@ -37,7 +37,7 @@ double CIntegralCalc::Calculate()
 	algParams.iLeftLim = start_idx;
 	algParams.iRightLim = end_idx;
 	algParams.iMaxPeakCount = 1;
-	algParams.iNoiseRate = gSettings.GetNoiseRate();
+	algParams.dNoiseRate = gSettings.GetNoiseRate();
 
 	size_t count = m_LstSpecData.size();
 	int* pData = new int[count];

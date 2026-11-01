@@ -37,7 +37,7 @@ void CSettings::Load()
 			QJsonObject json = doc.object();
 			m_bUseSpectrionData = json["UseSpectrionData"].toBool();
 			m_sSpectrionDir = json["SpectrionDir"].toString();
-			m_NoiseRate = json["NoiseRate"].toInteger();
+			m_NoiseRate = json["NoiseRate"].toDouble();
 			m_MaxIterationNum = json["MaxIterationNum"].toInteger();
 			m_ChangeCoeff = json["ChangeIntervalCoeff"].toDouble();;
 		}
