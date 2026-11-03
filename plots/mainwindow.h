@@ -164,7 +164,10 @@ private:
 private slots:
   void selectionChanged();
   void selectionHChanged();
-  void onMouseWheel(QWheelEvent* event);
+  void onRangeAxisYChanged(const QCPRange& newRange, const QCPRange& oldRange);
+  void onRangeAxisXChanged(const QCPRange& newRange, const QCPRange& oldRange);
+  void onRangeAxisYPlot2Changed(const QCPRange& newRange, const QCPRange& oldRange);
+  void onRangeAxisXPlotHChanged(const QCPRange& newRange, const QCPRange& oldRange);
 };
 
 #endif // MAINWINDOW_H

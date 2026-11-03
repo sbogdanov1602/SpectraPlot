@@ -103,7 +103,11 @@ MainWindow::MainWindow(QWidget *parent) :
   QObject::connect(ui->actionCalculate_integral, &QAction::triggered, this, qOverload<>(&MainWindow::onCalculateIntegralAction));
   QObject::connect(ui->actionCalculate_summ, &QAction::triggered, this, qOverload<>(&MainWindow::onCalculateSummAction));
   
-  QObject::connect(ui->customPlot, &QCustomPlot::mouseWheel, this, qOverload<QWheelEvent*>(&MainWindow::onMouseWheel));
+  QObject::connect(ui->customPlot->yAxis, SIGNAL(rangeChanged(const QCPRange&, const QCPRange&)), this, SLOT(onRangeAxisYChanged(const QCPRange&, const QCPRange&)));
+  QObject::connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(const QCPRange&, const QCPRange&)), this, SLOT(onRangeAxisXChanged(const QCPRange&, const QCPRange&)));
+  QObject::connect(ui->customPlot2->yAxis, SIGNAL(rangeChanged(const QCPRange&, const QCPRange&)), this, SLOT(onRangeAxisYPlot2Changed(const QCPRange&, const QCPRange&)));
+  QObject::connect(ui->customPlotH->xAxis, SIGNAL(rangeChanged(const QCPRange&, const QCPRange&)), this, SLOT(onRangeAxisXPlotHChanged(const QCPRange&, const QCPRange&)));
+
   QObject::connect(ui->customPlot, &QCustomPlot::plottableDoubleClick, this, qOverload<QCPAbstractPlottable*, int, QMouseEvent*>(&MainWindow::onPlotDblClick));//plottableClick
   QObject::connect(ui->customPlot, &QCustomPlot::plottableClick, this, qOverload<QCPAbstractPlottable*, int, QMouseEvent*>(&MainWindow::onPlotClick));
   QObject::connect(ui->customPlotH, &QCustomPlot::plottableClick, this, qOverload<QCPAbstractPlottable*, int, QMouseEvent*>(&MainWindow::onPlotHClick));
@@ -314,9 +318,10 @@ void MainWindow::onPlotClick(QCPAbstractPlottable* plottable, int dataIndex, QMo
     double key, value;
     plottable->pixelsToCoords(x, y, key, value);
     bool b;
-    auto keyRange = plottable->getKeyRange(b);
+    auto keyRange = plottable->keyAxis()->range();//plottable->getKeyRange(b);
     bool b1;
-    auto valueRange = plottable->getValueRange(b1);
+    //auto valueRange = plottable->getValueRange(b1);
+    auto valueRange = plottable->valueAxis()->range();// getValueRange(b1);
 
     m_spectrumIdx = (int)(value / gPlotData.GetPlotData()->MeasurementStep());
     setDataOneGraph(ui->customPlot2, gPlotData.GetPlotData()->LstSpecData()[m_spectrumIdx]);
@@ -333,7 +338,6 @@ void MainWindow::onPlotClick(QCPAbstractPlottable* plottable, int dataIndex, QMo
 
     range = ui->customPlot2->graph(0)->valueAxis()->range();
     m_VPlotCursor.CreateVCursor(ui->customPlot2, QPointF(key, range.lower), QPointF(key, range.upper), QPointF(key, signalValue), &m_BaseCursor);
-    //m_VPlotCursor.CreateVCursor(ui->customPlot2, QPointF(key, range.lower), QPointF(key, value*1.05), QPointF(key, signalValue), &m_BaseCursor);
     
     if (m_BaseCursor.Exists()) {
         m_BaseCursor.ClearCursor();
@@ -644,6 +648,9 @@ void MainWindow::setupColorDataMap(QCustomPlot* customPlot, std::function<std::v
         customPlot->axisRect()->setupFullAxesBox(true);
         customPlot->xAxis->setLabel(QString(&(gPlotData.GetPlotData()->MapXAxisLabel()[0])));
         customPlot->yAxis->setLabel(QString(&(gPlotData.GetPlotData()->MapYAxisLabel()[0])));
+        double fV = customPlot->axisRect()->rangeZoomFactor(Qt::Vertical);
+        double fH = customPlot->axisRect()->rangeZoomFactor(Qt::Horizontal);
+//        customPlot->axisRect()->setRangeZoomFactor(fH*2.0, fV*2.0);
 
         // set up the QCPColorMap:
         m_colorMap = new QCPColorMap(customPlot->xAxis, customPlot->yAxis);
@@ -1061,10 +1068,62 @@ void MainWindow::updateSetBaseCursorAction(bool bEnabled)
     ui->actionRemove_base_cursor->setEnabled(!bEnabled);
 }
 
-void MainWindow::onMouseWheel(QWheelEvent* event)
+void MainWindow::onRangeAxisYChanged(const QCPRange& newRange, const QCPRange& oldRange)
 {
-    int i = 0;
+    auto vTextLabel = m_HeatMapVCursor.TextLabel();
+    if (vTextLabel) {
+        double key = vTextLabel->position->key();
+        double value = vTextLabel->position->value();
+        vTextLabel->position->setCoords(key, newRange.upper);
+        QPointF vTextData = m_HeatMapVCursor.VTextData();
+        m_HeatMapVCursor.ClearCursor();
+        m_HeatMapVCursor.CreateVCursor(ui->customPlot, QPointF(key, newRange.lower), QPointF(key, newRange.upper), vTextData, &m_BaseCursor);
+    }
+    else {
+        int i = 1;
+    }
 }
+
+void MainWindow::onRangeAxisXChanged(const QCPRange& newRange, const QCPRange& oldRange)
+{
+    auto hTextLabel = m_HeatMapHCursor.TextLabel();
+    if (hTextLabel) {
+        double key = hTextLabel->position->key();
+        double value = hTextLabel->position->value();
+        hTextLabel->position->setCoords(newRange.upper, value);
+        QPointF hTextData = m_HeatMapHCursor.HTextData();
+        m_HeatMapHCursor.ClearCursor();
+        m_HeatMapHCursor.CreateHCursor(ui->customPlot, QPointF(newRange.lower, value), QPointF(newRange.upper, value), hTextData);
+    }
+    else {
+        int i = 1;
+    }
+}
+
+void MainWindow::onRangeAxisYPlot2Changed(const QCPRange& newRange, const QCPRange& oldRange)
+{
+    auto vTextLabel = m_VPlotCursor.TextLabel();
+    if (vTextLabel) {
+        double key = vTextLabel->position->key();
+        vTextLabel->position->setCoords(key, newRange.upper);
+        QPointF vTextData = m_VPlotCursor.VTextData();
+        m_VPlotCursor.ClearCursor();
+        m_VPlotCursor.CreateVCursor(ui->customPlot2, QPointF(key, newRange.lower), QPointF(key, newRange.upper), vTextData, &m_BaseCursor);
+    }
+}
+
+void MainWindow::onRangeAxisXPlotHChanged(const QCPRange& newRange, const QCPRange& oldRange)
+{
+    auto hTextLabel = m_HPlotCursor.TextLabel();
+    if (hTextLabel) {
+        double value = hTextLabel->position->value();
+        hTextLabel->position->setCoords(newRange.upper, value);
+        QPointF hTextData = m_HPlotCursor.HTextData();
+        m_HPlotCursor.ClearCursor();
+        m_HPlotCursor.CreateHCursor(ui->customPlotH, QPointF(newRange.lower, value), QPointF(newRange.upper, value), hTextData);
+    }
+}
+
 
 
 

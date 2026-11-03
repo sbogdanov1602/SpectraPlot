@@ -28,6 +28,7 @@ public:
 	void ClearCursor();
 	QPointF& HTextData() {return m_hTextData;}
 	QPointF& VTextData() { return m_vTextData; }
+	QCPItemText* TextLabel() { return m_textLabel;	}
 protected:
 	QCPItemText* m_textLabel;
 	QPointF m_hTextData;
