@@ -44,6 +44,7 @@
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #  include <QDesktopWidget>
 #endif
+#include <FilterA.h>
 #include <QScreen>
 #include <QMessageBox>
 #include <QMetaEnum>
@@ -446,12 +447,19 @@ std::vector<double> MainWindow::funcLogarithm10(const std::vector<double>& v)
 
 std::vector<double> MainWindow::funcFilterA(const std::vector<double>& v)
 {
+    /*
     std::vector<double> result(v.size());
     for (size_t i = 0; i < v.size(); ++i) {
         result[i] = v[i] / gPlotData.GetPlotData()->SignalCoeff();
-        result[i] *= log(result[i] + 1.0);
+    }
+    */
+    FilterA filter(v);
+    auto result = filter.Calculate();
+    /*
+    for (size_t i = 0; i < v.size(); ++i) {
         result[i] *= gPlotData.GetPlotData()->SignalCoeff();
     }
+    */
     return result;
 }
 

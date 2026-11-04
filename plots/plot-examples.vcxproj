@@ -198,6 +198,7 @@
     <ClCompile Include="C2DIntegralCalc.cpp" />
     <ClCompile Include="CPlotData.cpp" />
     <ClCompile Include="Cursor.cpp" />
+    <ClCompile Include="FilterA.cpp" />
     <ClCompile Include="IntegralCalc.cpp" />
     <ClCompile Include="IntegralModel.cpp" />
     <ClCompile Include="IntegralSummCalc.cpp" />
@@ -243,6 +244,7 @@
     <ClInclude Include="Common.h" />
     <ClInclude Include="CPlotData.h" />
     <ClInclude Include="Cursor.h" />
+    <ClInclude Include="FilterA.h" />
     <ClInclude Include="IntegralCalc.h" />
     <QtMoc Include="IntegralModel.h" />
     <ClInclude Include="IntegralSummCalc.h" />
