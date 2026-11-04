@@ -1110,6 +1110,10 @@ void MainWindow::onRangeAxisYPlot2Changed(const QCPRange& newRange, const QCPRan
         m_VPlotCursor.ClearCursor();
         m_VPlotCursor.CreateVCursor(ui->customPlot2, QPointF(key, newRange.lower), QPointF(key, newRange.upper), vTextData, &m_BaseCursor);
     }
+    if (m_BaseCursor.Exists()) {
+        m_BaseCursor.ClearCursor();
+        m_BaseCursor.Create(ui->customPlot2, &m_HSelect.ItemLine(), &gPlotData.GetPlotData()->LstSpecData(), m_spectrumIdx);
+    }
 }
 
 void MainWindow::onRangeAxisXPlotHChanged(const QCPRange& newRange, const QCPRange& oldRange)
