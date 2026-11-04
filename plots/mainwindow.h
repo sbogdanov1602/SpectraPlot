@@ -84,7 +84,7 @@ public slots:
 	void onSetBaseCursor();
 	void onRemoveBaseCursor();
 	void onApplyLog10();
-	void onApplyLn();
+	void onApplyFilterA();
 	void onApplyStandard();
 
 	void onItemClick(QCPAbstractItem* ai, QMouseEvent* event);
@@ -158,8 +158,8 @@ private:
   std::function<std::vector<double>(const std::vector<double>&)> m_funcLogarithm10;
   std::vector<double> funcLogarithm10(const std::vector<double>& v);
 
-  std::function<std::vector<double>(const std::vector<double>&)> m_funcLogarithmE;
-  std::vector<double>  funcLogarithmE(const std::vector<double>& v);
+  std::function<std::vector<double>(const std::vector<double>&)> m_funcFilterA;
+  std::vector<double>  funcFilterA(const std::vector<double>& v);
 
 private slots:
   void selectionChanged();

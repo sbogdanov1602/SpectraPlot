@@ -74,8 +74,8 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="123"/>
-        <source>Apply Ln</source>
-        <translation>Применить натуральный логарифм</translation>
+        <source>Apply Filter A</source>
+        <translation>Применить фильтр А</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="128"/>

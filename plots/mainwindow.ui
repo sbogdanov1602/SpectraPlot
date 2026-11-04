@@ -72,7 +72,7 @@
     <addaction name="separator"/>
     <addaction name="actionApply_Standard"/>
     <addaction name="actionAppli_Log10"/>
-    <addaction name="actionApply_Ln"/>
+    <addaction name="actionApply_Filter_A"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -118,9 +118,9 @@
     <string>Apply Log10</string>
    </property>
   </action>
-  <action name="actionApply_Ln">
+  <action name="actionApply_Filter_A">
    <property name="text">
-    <string>Apply Ln</string>
+    <string>Apply Filter A</string>
    </property>
   </action>
   <action name="actionApply_Standard">

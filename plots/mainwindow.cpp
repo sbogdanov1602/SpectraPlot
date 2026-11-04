@@ -116,7 +116,7 @@ MainWindow::MainWindow(QWidget *parent) :
   QObject::connect(ui->customPlot, &QCustomPlot::itemClick, this, qOverload<QCPAbstractItem*, QMouseEvent*>(&MainWindow::onItemClick));//plottableClick
 
   QObject::connect(ui->actionAppli_Log10, &QAction::triggered, this, qOverload<>(&MainWindow::onApplyLog10));
-  QObject::connect(ui->actionApply_Ln, &QAction::triggered, this, qOverload<>(&MainWindow::onApplyLn));
+  QObject::connect(ui->actionApply_Filter_A, &QAction::triggered, this, qOverload<>(&MainWindow::onApplyFilterA));
   QObject::connect(ui->actionApply_Standard, &QAction::triggered, this, qOverload<>(&MainWindow::onApplyStandard));
 
   //QObject::connect(ui->customPlot2, &QCustomPlot::selectionChangedByUser, this, qOverload<>(&MainWindow::selectionChanged/*SLOT(selectionChanged()*/));
@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->customPlotH, SIGNAL(selectionChangedByUser()), this, SLOT(selectionHChanged()));
 
   m_funcLogarithm10 = std::bind(&MainWindow::funcLogarithm10, this, std::placeholders::_1);
-  m_funcLogarithmE = std::bind(&MainWindow::funcLogarithmE, this, std::placeholders::_1);
+  m_funcFilterA = std::bind(&MainWindow::funcFilterA, this, std::placeholders::_1);
 
   QMetaObject::connectSlotsByName(this);
 
@@ -444,7 +444,7 @@ std::vector<double> MainWindow::funcLogarithm10(const std::vector<double>& v)
     return result;
 }
 
-std::vector<double> MainWindow::funcLogarithmE(const std::vector<double>& v)
+std::vector<double> MainWindow::funcFilterA(const std::vector<double>& v)
 {
     std::vector<double> result(v.size());
     for (size_t i = 0; i < v.size(); ++i) {
@@ -1042,9 +1042,9 @@ void MainWindow::onRemoveBaseCursor()
     updateSetBaseCursorAction(true);
 }
 
-void MainWindow::onApplyLn()
+void MainWindow::onApplyFilterA()
 {
-    setupColorDataMap(ui->customPlot, m_funcLogarithmE);
+    setupColorDataMap(ui->customPlot, m_funcFilterA);
 }
 
 void MainWindow::onApplyLog10()
